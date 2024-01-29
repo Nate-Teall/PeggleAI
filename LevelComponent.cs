@@ -1,0 +1,162 @@
+﻿using System;
+
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
+
+using nkast.Aether.Physics2D.Dynamics;
+using Vector2 = nkast.Aether.Physics2D.Common.Vector2;
+
+public class LevelComponent : DrawableGameComponent
+{
+	// Sprites
+	private SpriteBatch _spriteBatch;
+	private BasicEffect _spriteBatchEffect;
+
+	private Texture2D _playerTexture;
+	private Texture2D _groundTexture;
+	private Vector2 _playerTextureSize;
+	private Vector2 _groundTextureSize;
+	private Vector2 _playerTextureOrigin;
+	private Vector2 _groundTextureOrigin;
+
+	// Input
+	private KeyboardState _oldKbState;
+
+	// Camera
+	private Vector3 _cameraPosition = new Vector3(0, 1.70f, 0); // Camera is 1.7 meters above the ground
+	float cameraViewWidth = 12.5f; // Camera is 12.5 meters wide
+
+	// Physics
+	private World _world;
+	private Body _playerBody;
+	private Body _groundBody;
+	private float _playerBodyRadius = 1.5f / 2f; // Diameter of the player is 1.5 meters
+	private Vector2 _groundBodySize = new Vector2(8f, 1f); // Ground is 8x1 meters
+
+    public LevelComponent(Game game) : base(game)
+    {
+
+    }
+
+	public override void Initialize()
+	{
+		// Create a new world
+		_world = new World();
+
+		/* Circle */
+		Vector2 playerPosition = new Vector2(0, _playerBodyRadius);
+
+		// Create the player fixture
+		// Fixtures are what binds a shape to a body for collision.
+		_playerBody = _world.CreateBody(playerPosition, 0, BodyType.Dynamic);
+		var p_fixture = _playerBody.CreateCircle(_playerBodyRadius, 1f);
+
+		// Fixtures hold data for bounciness and friction as well
+		p_fixture.Restitution = 0.6f;
+		p_fixture.Friction = 0.5f;
+
+
+
+		/* Ground */
+		Vector2 groundPosition = new Vector2(0, -(_groundBodySize.Y / 2f));
+
+		// Create ground fixture
+		_groundBody = _world.CreateBody(groundPosition, 0, BodyType.Static);
+		var g_fixture = _groundBody.CreateRectangle(_groundBodySize.X, _groundBodySize.Y, 1f, Vector2.Zero);
+
+		g_fixture.Restitution = 0.3f;
+		g_fixture.Friction = 0.5f;
+
+		base.Initialize();
+	}
+
+	protected override void LoadContent()
+	{
+		_spriteBatch = new SpriteBatch(Game.GraphicsDevice);
+		// Use a BasicEffect for texturing, never done this before
+		_spriteBatchEffect = new BasicEffect(Game.GraphicsDevice);
+		_spriteBatchEffect.TextureEnabled = true;
+
+		// Load sprites
+		_playerTexture = Game.Content.Load<Texture2D>("CircleSprite");
+		_groundTexture = Game.Content.Load<Texture2D>("GroundSprite");
+
+		// Scale the texture to the collision body dimensions
+		_playerTextureSize = new Vector2(_playerTexture.Width, _playerTexture.Height);
+		_groundTextureSize = new Vector2(_groundTexture.Width, _groundTexture.Height);
+
+		// Draw the texture at the center of the shapes
+		_playerTextureOrigin = _playerTextureSize / 2f;
+		_groundTextureOrigin = _groundTextureSize / 2f;
+	}
+
+	public override void Update(GameTime gameTime)
+	{
+		// Input
+		HandleKeyboard(gameTime);
+
+		// Update world 
+		_world.Step((float)gameTime.ElapsedGameTime.TotalSeconds);
+	}
+
+	private void HandleKeyboard(GameTime gameTime)
+	{
+		KeyboardState state = Keyboard.GetState();
+		float totalSeconds = (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+		// Move Camera
+		if (state.IsKeyDown(Keys.Left))
+			_cameraPosition.X -= totalSeconds * cameraViewWidth;
+
+        if (state.IsKeyDown(Keys.Right))
+            _cameraPosition.X += totalSeconds * cameraViewWidth;
+
+        if (state.IsKeyDown(Keys.Up))
+            _cameraPosition.Y += totalSeconds * cameraViewWidth;
+
+        if (state.IsKeyDown(Keys.Down))
+            _cameraPosition.Y -= totalSeconds * cameraViewWidth;
+
+        // Rotate player
+        if (state.IsKeyDown(Keys.A))
+            _playerBody.ApplyTorque(10);
+
+        if (state.IsKeyDown(Keys.D))
+            _playerBody.ApplyTorque(-10);
+
+        if (state.IsKeyDown(Keys.Space) && _oldKbState.IsKeyUp(Keys.Space))
+            _playerBody.ApplyLinearImpulse(new Vector2(0, 10));
+
+		_oldKbState = state;
+    }
+
+	public override void Draw(GameTime gameTime)
+	{
+		// Update camera View and Projection
+		var vp = GraphicsDevice.Viewport;
+		_spriteBatchEffect.View = Matrix.CreateLookAt(_cameraPosition, _cameraPosition + Vector3.Forward, Vector3.Up);
+		_spriteBatchEffect.Projection = Matrix.CreateOrthographic(cameraViewWidth, cameraViewWidth / vp.AspectRatio, 0f, -1f);
+
+		// Draw player and ground. 
+		// Our View/Projection requires RasterizerState.CullClockwise and SpriteEffects.FlipVertically.
+		_spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, RasterizerState.CullClockwise, _spriteBatchEffect);
+
+
+		// For some reason I need to convert between Aether2D vectors to Microsoft Vectors manually...
+		// TODO: Fix this casting issue
+		Microsoft.Xna.Framework.Vector2 playerPos = new Microsoft.Xna.Framework.Vector2(_playerBody.Position.X, _playerBody.Position.Y);
+        Microsoft.Xna.Framework.Vector2 groundPos = new Microsoft.Xna.Framework.Vector2(_groundBody.Position.X, _groundBody.Position.Y);
+
+        Microsoft.Xna.Framework.Vector2 playerOrig = new Microsoft.Xna.Framework.Vector2(_playerTextureOrigin.X, _playerTextureOrigin.Y);
+        Microsoft.Xna.Framework.Vector2 groundOrig = new Microsoft.Xna.Framework.Vector2(_groundTextureOrigin.X, _groundTextureOrigin.Y);
+
+        Microsoft.Xna.Framework.Vector2 playerTextureScale = new Microsoft.Xna.Framework.Vector2( (_playerBodyRadius * 2f) / _playerTextureSize.X, (_playerBodyRadius * 2f) / _playerTextureSize.Y);
+        Microsoft.Xna.Framework.Vector2 groundTextureScale = new Microsoft.Xna.Framework.Vector2(_groundBodySize.X / _groundTextureSize.X, _groundBodySize.Y / _groundTextureSize.Y);
+
+        _spriteBatch.Draw(_playerTexture, playerPos, null, Color.White, _playerBody.Rotation, playerOrig, playerTextureScale, SpriteEffects.FlipVertically, 0f);
+		_spriteBatch.Draw(_groundTexture, groundPos, null, Color.White, _groundBody.Rotation, groundOrig, groundTextureScale, SpriteEffects.FlipVertically, 0f);
+		_spriteBatch.End();
+	}
+
+}	

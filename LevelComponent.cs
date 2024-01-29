@@ -1,7 +1,8 @@
 ﻿using System;
 
-using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -76,9 +77,7 @@ namespace PeggleAI
 			g_fixture.Restitution = 0.3f;
 			g_fixture.Friction = 0.5f;
 
-			// Create all of the pegs in the level
-			pegs = new List<Peg>();
-			pegs.Add( new Peg(_world, -5f, 1.5f) );
+			
 
 			base.Initialize();
 		}
@@ -103,8 +102,25 @@ namespace PeggleAI
 			_playerTextureOrigin = _playerTextureSize / 2f;
 			_groundTextureOrigin = _groundTextureSize / 2f;
 
+			loadLevel();
 			foreach(Peg peg in pegs)
 				peg.loadContent(_playerTexture);
+		}
+
+		private void loadLevel()
+		{
+			// Load data from level1 file
+			string[] pegPositions = File.ReadAllLines("../../../Level1.txt");
+
+			// Create all of the pegs in the level
+			pegs = new List<Peg>();
+			foreach (string position in pegPositions)
+			{
+				string[] pos = position.Split(' ');
+				pegs.Add( new Peg(_world, float.Parse(pos[0]), float.Parse(pos[1])) );
+			}
+			
+			
 		}
 
 		public override void Update(GameTime gameTime)
@@ -146,19 +162,6 @@ namespace PeggleAI
 			if (state.IsKeyDown(Keys.Down))
 				_cameraPosition.Y -= totalSeconds * cameraViewWidth;
 			*/
-
-			// Move the peg for finding peg locations manually
-			if (state.IsKeyDown(Keys.Left))
-				pegs[0].moveHorizontal(-0.5f * totalSeconds);
-
-			if (state.IsKeyDown(Keys.Right))
-				pegs[0].moveHorizontal(0.5f * totalSeconds);
-
-			if (state.IsKeyDown(Keys.Up))
-				pegs[0].moveVertical(0.5f * totalSeconds);
-
-			if (state.IsKeyDown(Keys.Down))
-				pegs[0].moveVertical(-0.5f * totalSeconds);
 			
 
 			// Rotate player

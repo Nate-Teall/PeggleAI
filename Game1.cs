@@ -22,6 +22,7 @@ namespace PeggleAI
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
+
             _level = new LevelComponent(this);
             Components.Add(_level);
 

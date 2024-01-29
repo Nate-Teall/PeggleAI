@@ -24,11 +24,11 @@ namespace PeggleAI
         private float _pegRadius = 0.25f;
         private Body _pegBody;
 
-        public Peg(World world)
+        public Peg(World world, float x, float y)
         {
             this._world = world;
 
-            Vector2 pegPosition = new Vector2(0, _pegRadius);
+            Vector2 pegPosition = new Vector2(x, y);
 
             _pegBody = _world.CreateBody(pegPosition, 0, BodyType.Static);
             var p_fixture = _pegBody.CreateCircle(_pegRadius, 1f);

@@ -1,5 +1,7 @@
 ﻿using System;
 
+using System.Collections;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -36,7 +38,8 @@ namespace PeggleAI
 		private float _playerBodyRadius = 1.5f / 2f; // Diameter of the player is 1.5 meters
 		private Vector2 _groundBodySize = new Vector2(8f, 1f); // Ground is 8x1 meters
 
-		private Peg peg;
+		// Level Objects
+		List<Peg> pegs;
 
 		public LevelComponent(Game game) : base(game)
 		{
@@ -61,7 +64,6 @@ namespace PeggleAI
 			p_fixture.Friction = 0.5f;
 
 
-
 			/* Ground */
 			Vector2 groundPosition = new Vector2(0, -(_groundBodySize.Y / 2f));
 
@@ -72,8 +74,12 @@ namespace PeggleAI
 			g_fixture.Restitution = 0.3f;
 			g_fixture.Friction = 0.5f;
 
-			// Create new peg
-			peg = new Peg(_world);
+			// Create all of the pegs in the level
+			pegs = new List<Peg>();
+			pegs.Add( new Peg(_world, 1f, 1f) );
+			pegs.Add( new Peg(_world, 0f, 4f) );
+			pegs.Add( new Peg(_world, -2f, 1.5f) );
+			pegs.Add( new Peg(_world, -1f, 0.5f) );
 
 			base.Initialize();
 		}
@@ -97,7 +103,8 @@ namespace PeggleAI
 			_playerTextureOrigin = _playerTextureSize / 2f;
 			_groundTextureOrigin = _groundTextureSize / 2f;
 
-			peg.loadContent(_playerTexture);
+			foreach(Peg peg in pegs)
+				peg.loadContent(_playerTexture);
 		}
 
 		public override void Update(GameTime gameTime)
@@ -178,7 +185,8 @@ namespace PeggleAI
 				0f
 			);
 
-			peg.draw(_spriteBatch);
+			foreach(Peg peg in pegs)
+				peg.draw(_spriteBatch);
 
 			_spriteBatch.End();
 		}

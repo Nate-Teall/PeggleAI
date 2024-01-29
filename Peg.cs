@@ -21,8 +21,8 @@ namespace PeggleAI
 
         // Physics
         private World _world;
-        private float _pegRadius = 0.25f;
-        private Body _pegBody;
+        private float _pegRadius = 0.15f;
+        public Body _pegBody { get; }
 
         public Peg(World world, float x, float y)
         {
@@ -45,6 +45,16 @@ namespace PeggleAI
                 (_pegRadius * 2f) / _pegTextureSize.X, 
                 (_pegRadius * 2f) / _pegTextureSize.Y
             );
+        }
+
+
+        public void moveHorizontal(float x)
+        {
+            _pegBody.Position = new Vector2(_pegBody.Position.X + x, _pegBody.Position.Y);
+        }
+        public void moveVertical(float y)
+        {
+            _pegBody.Position = new Vector2(_pegBody.Position.X, _pegBody.Position.Y + y);
         }
 
         public void draw(SpriteBatch spriteBatch)

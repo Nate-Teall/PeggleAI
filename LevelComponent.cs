@@ -26,9 +26,10 @@ namespace PeggleAI
 
 		// Input
 		private KeyboardState _oldKbState;
+		private MouseState _oldMouseState;
 
 		// Camera
-		private Vector3 _cameraPosition = new Vector3(0, 1.70f, 0); // Camera is 1.7 meters above the ground
+		private Vector3 _cameraPosition = new Vector3(0, 0, 0); // Camera is 1.7 meters above the ground
 		float cameraViewWidth = 12.5f; // Camera is 12.5 meters wide
 
 		// Physics
@@ -39,6 +40,7 @@ namespace PeggleAI
 		private Vector2 _groundBodySize = new Vector2(8f, 1f); // Ground is 8x1 meters
 
 		// Level Objects
+		private Texture2D _bg;
 		List<Peg> pegs;
 
 		public LevelComponent(Game game) : base(game)
@@ -76,10 +78,7 @@ namespace PeggleAI
 
 			// Create all of the pegs in the level
 			pegs = new List<Peg>();
-			pegs.Add( new Peg(_world, 1f, 1f) );
-			pegs.Add( new Peg(_world, 0f, 4f) );
-			pegs.Add( new Peg(_world, -2f, 1.5f) );
-			pegs.Add( new Peg(_world, -1f, 0.5f) );
+			pegs.Add( new Peg(_world, -5f, 1.5f) );
 
 			base.Initialize();
 		}
@@ -94,6 +93,7 @@ namespace PeggleAI
 			// Load sprites
 			_playerTexture = Game.Content.Load<Texture2D>("CircleSprite");
 			_groundTexture = Game.Content.Load<Texture2D>("GroundSprite");
+            _bg = Game.Content.Load<Texture2D>("Level1");
 
 			// Scale the texture to the collision body dimensions
 			_playerTextureSize = new Vector2(_playerTexture.Width, _playerTexture.Height);
@@ -111,9 +111,20 @@ namespace PeggleAI
 		{
 			// Input
 			HandleKeyboard(gameTime);
+			HandleMouse();
 
 			// Update world 
 			_world.Step((float)gameTime.ElapsedGameTime.TotalSeconds);
+		}
+
+		private void HandleMouse()
+		{
+			MouseState state = Mouse.GetState();
+
+			if( state.LeftButton == ButtonState.Pressed && _oldMouseState.LeftButton == ButtonState.Released)
+				System.Diagnostics.Debug.WriteLine( pegs[0]._pegBody.Position.X + " " + pegs[0]._pegBody.Position.Y );
+
+			_oldMouseState = state;
 		}
 
 		private void HandleKeyboard(GameTime gameTime)
@@ -121,6 +132,7 @@ namespace PeggleAI
 			KeyboardState state = Keyboard.GetState();
 			float totalSeconds = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
+			/*
 			// Move Camera
 			if (state.IsKeyDown(Keys.Left))
 				_cameraPosition.X -= totalSeconds * cameraViewWidth;
@@ -133,6 +145,21 @@ namespace PeggleAI
 
 			if (state.IsKeyDown(Keys.Down))
 				_cameraPosition.Y -= totalSeconds * cameraViewWidth;
+			*/
+
+			// Move the peg for finding peg locations manually
+			if (state.IsKeyDown(Keys.Left))
+				pegs[0].moveHorizontal(-0.5f * totalSeconds);
+
+			if (state.IsKeyDown(Keys.Right))
+				pegs[0].moveHorizontal(0.5f * totalSeconds);
+
+			if (state.IsKeyDown(Keys.Up))
+				pegs[0].moveVertical(0.5f * totalSeconds);
+
+			if (state.IsKeyDown(Keys.Down))
+				pegs[0].moveVertical(-0.5f * totalSeconds);
+			
 
 			// Rotate player
 			if (state.IsKeyDown(Keys.A))
@@ -158,9 +185,22 @@ namespace PeggleAI
 			// Our View/Projection requires RasterizerState.CullClockwise and SpriteEffects.FlipVertically.
 			_spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, RasterizerState.CullClockwise, _spriteBatchEffect);
 
+			Microsoft.Xna.Framework.Vector2 bgPos = new Microsoft.Xna.Framework.Vector2(_bg.Width/2f, _bg.Height/2f);
+			_spriteBatch.Draw(
+				_bg,
+				Microsoft.Xna.Framework.Vector2.Zero,
+				null,
+				Color.White,
+				0f,
+				bgPos,
+				0.0125f,
+				SpriteEffects.FlipVertically,
+				0f
+			);
+
 			Vector2 playerTextureScale = new Vector2( (_playerBodyRadius * 2f) / _playerTextureSize.X, (_playerBodyRadius * 2f) / _playerTextureSize.Y);
 			Vector2 groundTextureScale = new Vector2(_groundBodySize.X / _groundTextureSize.X, _groundBodySize.Y / _groundTextureSize.Y);
-
+			/*
 			_spriteBatch.Draw(
 				_playerTexture, 
 				convertVec(_playerBody.Position), 
@@ -184,6 +224,7 @@ namespace PeggleAI
 				SpriteEffects.FlipVertically, 
 				0f
 			);
+			*/
 
 			foreach(Peg peg in pegs)
 				peg.draw(_spriteBatch);

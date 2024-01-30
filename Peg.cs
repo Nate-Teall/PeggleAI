@@ -47,16 +47,6 @@ namespace PeggleAI
             );
         }
 
-
-        public void moveHorizontal(float x)
-        {
-            _pegBody.Position = new Vector2(_pegBody.Position.X + x, _pegBody.Position.Y);
-        }
-        public void moveVertical(float y)
-        {
-            _pegBody.Position = new Vector2(_pegBody.Position.X, _pegBody.Position.Y + y);
-        }
-
         public void draw(SpriteBatch spriteBatch)
         {
             spriteBatch.Draw(

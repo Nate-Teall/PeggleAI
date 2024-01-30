@@ -20,6 +20,7 @@ namespace PeggleAI
 
 		private Texture2D _playerTexture;
 		private Texture2D _groundTexture;
+		private Texture2D _arrowTexture;
 		private Vector2 _playerTextureSize;
 		private Vector2 _groundTextureSize;
 		private Vector2 _playerTextureOrigin;
@@ -42,7 +43,8 @@ namespace PeggleAI
 
 		// Level Objects
 		private Texture2D _bg;
-		List<Peg> pegs;
+		private List<Peg> pegs;
+		private BallShooter shooter;
 
 		public LevelComponent(Game game) : base(game)
 		{
@@ -93,6 +95,7 @@ namespace PeggleAI
 			_playerTexture = Game.Content.Load<Texture2D>("CircleSprite");
 			_groundTexture = Game.Content.Load<Texture2D>("GroundSprite");
             _bg = Game.Content.Load<Texture2D>("Level1");
+			_arrowTexture = Game.Content.Load<Texture2D>("Arrow");
 
 			// Scale the texture to the collision body dimensions
 			_playerTextureSize = new Vector2(_playerTexture.Width, _playerTexture.Height);
@@ -105,6 +108,8 @@ namespace PeggleAI
 			loadLevel();
 			foreach(Peg peg in pegs)
 				peg.loadContent(_playerTexture);
+
+			shooter = new BallShooter(_arrowTexture);
 		}
 
 		private void loadLevel()
@@ -231,6 +236,8 @@ namespace PeggleAI
 
 			foreach(Peg peg in pegs)
 				peg.draw(_spriteBatch);
+
+			shooter.draw(_spriteBatch);
 
 			_spriteBatch.End();
 		}

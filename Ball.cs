@@ -38,12 +38,13 @@ namespace PeggleAI
             Ball.ballTexture = ballTexture;
             Ball.world = world;
 
-            ballTextureSize = new Vector2(ballTexture.Width, ballTexture.Height);
-            ballTextureOrigin = ballTextureSize / 2f;
-            ballTextureScale = new Vector2(
+            Ball.ballTextureSize = new Vector2(ballTexture.Width, ballTexture.Height);
+            Ball.ballTextureScale = new Vector2(
                 (ballRadius * 2f) / ballTextureSize.X,
                 (ballRadius * 2f) / ballTextureSize.Y
             );
+
+            Ball.ballTextureOrigin = ballTextureSize / 2f;
         }
 
         public void draw(SpriteBatch spriteBatch)

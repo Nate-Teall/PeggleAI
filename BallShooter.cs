@@ -44,6 +44,7 @@ namespace PeggleAI
 
         public void shoot()
         {
+            // TODO: Remove previous ball from the world
             this.ball = new Ball(0, 3.6f);
         }
 

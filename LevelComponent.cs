@@ -15,34 +15,22 @@ namespace PeggleAI
 	public class LevelComponent : DrawableGameComponent
 	{
 		// Sprites
-		private SpriteBatch _spriteBatch;
-		private BasicEffect _spriteBatchEffect;
-
-		private Texture2D _playerTexture;
-		private Texture2D _groundTexture;
-		private Texture2D _arrowTexture;
-		private Vector2 _playerTextureSize;
-		private Vector2 _groundTextureSize;
-		private Vector2 _playerTextureOrigin;
-		private Vector2 _groundTextureOrigin;
+		private SpriteBatch spriteBatch;
+		private BasicEffect spriteBatchEffect;
 
 		// Input
-		private KeyboardState _oldKbState;
-		private MouseState _oldMouseState;
+		private KeyboardState oldKbState;
+		private MouseState oldMouseState;
 
 		// Camera
-		private Vector3 _cameraPosition = new Vector3(0, 0, 0);
-		float cameraViewWidth = 12.5f; // Camera view is 12.5 units wide
+		private Vector3 cameraPosition = new Vector3(0, 0, 0);
+		float cameraViewWidth = 12.5f;
 
 		// Physics
-		private World _world;
-		private Body _playerBody;
-		private Body _groundBody;
-		private float _playerBodyRadius = 1.5f / 2f; // Diameter of the player is 1.5 meters
-		private Vector2 _groundBodySize = new Vector2(8f, 1f); // Ground is 8x1 meters
+		private World world;
 
 		// Level Objects
-		private Texture2D _bg;
+		private Texture2D background;
 		private List<Peg> pegs;
 		private BallShooter shooter;
 
@@ -53,64 +41,32 @@ namespace PeggleAI
 
 		public override void Initialize()
 		{
-			// Create a new world
-			_world = new World();
-
-			/* Circle */
-			Vector2 playerPosition = new Vector2(0, _playerBodyRadius);
-
-			// Create the player fixture
-			// Fixtures are what binds a shape to a body for collision.
-			_playerBody = _world.CreateBody(playerPosition, 0, BodyType.Dynamic);
-			var p_fixture = _playerBody.CreateCircle(_playerBodyRadius, 1f);
-
-			// Fixtures hold data for bounciness and friction as well
-			p_fixture.Restitution = 0.6f;
-			p_fixture.Friction = 0.5f;
-
-
-			/* Ground */
-			Vector2 groundPosition = new Vector2(0, -(_groundBodySize.Y / 2f));
-
-			// Create ground fixture
-			_groundBody = _world.CreateBody(groundPosition, 0, BodyType.Static);
-			var g_fixture = _groundBody.CreateRectangle(_groundBodySize.X, _groundBodySize.Y, 1f, Vector2.Zero);
-
-			g_fixture.Restitution = 0.3f;
-			g_fixture.Friction = 0.5f;
-
-			
+			// Create a new world that holds all physics information
+			world = new World();
 
 			base.Initialize();
 		}
 
 		protected override void LoadContent()
 		{
-			_spriteBatch = new SpriteBatch(Game.GraphicsDevice);
-			// Use a BasicEffect for texturing, never done this before
-			_spriteBatchEffect = new BasicEffect(Game.GraphicsDevice);
-			_spriteBatchEffect.TextureEnabled = true;
+			spriteBatch = new SpriteBatch(Game.GraphicsDevice);
+			// BasicEffect is used with the camera
+			spriteBatchEffect = new BasicEffect(Game.GraphicsDevice);
+			spriteBatchEffect.TextureEnabled = true;
 
 			// Load sprites
-			_playerTexture = Game.Content.Load<Texture2D>("CircleSprite");
-			_groundTexture = Game.Content.Load<Texture2D>("GroundSprite");
-            _bg = Game.Content.Load<Texture2D>("Level1");
-			_arrowTexture = Game.Content.Load<Texture2D>("Arrow");
+			Texture2D ballTexture = Game.Content.Load<Texture2D>("CircleSprite");
+            background = Game.Content.Load<Texture2D>("Level1");
+			Texture2D arrowTexture = Game.Content.Load<Texture2D>("Arrow");
 
-			// Scale the texture to the collision body dimensions
-			_playerTextureSize = new Vector2(_playerTexture.Width, _playerTexture.Height);
-			_groundTextureSize = new Vector2(_groundTexture.Width, _groundTexture.Height);
+			// Call loadContent to give each game object the textures they need
+			// TODO: make peg.loadContent a static method
+			Peg.loadContent(ballTexture, world);
+			Ball.loadContent(ballTexture, world);
 
-			// Draw the texture at the center of the shapes
-			_playerTextureOrigin = _playerTextureSize / 2f;
-			_groundTextureOrigin = _groundTextureSize / 2f;
-
+			// Create all of the level objects
 			loadLevel();
-			foreach(Peg peg in pegs)
-				peg.loadContent(_playerTexture);
-
-			shooter = new BallShooter(_arrowTexture);
-			Ball.loadContent(_playerTexture, _world);
+			shooter = new BallShooter(arrowTexture);
 		}
 
 		private void loadLevel()
@@ -123,9 +79,8 @@ namespace PeggleAI
 			foreach (string position in pegPositions)
 			{
 				string[] pos = position.Split(' ');
-				pegs.Add( new Peg(_world, float.Parse(pos[0]), float.Parse(pos[1])) );
+				pegs.Add( new Peg(float.Parse(pos[0]), float.Parse(pos[1])) );
 			}
-			
 			
 		}
 
@@ -133,43 +88,25 @@ namespace PeggleAI
 		{
 			// Input
 			HandleKeyboard(gameTime);
-			HandleMouse();
+			//HandleMouse();
 
 			// Update world 
-			_world.Step((float)gameTime.ElapsedGameTime.TotalSeconds);
+			world.Step((float)gameTime.ElapsedGameTime.TotalSeconds);
 		}
 
 		private void HandleMouse()
 		{
 			MouseState state = Mouse.GetState();
 
-			if( state.LeftButton == ButtonState.Pressed && _oldMouseState.LeftButton == ButtonState.Released)
-				System.Diagnostics.Debug.WriteLine( pegs[0]._pegBody.Position.X + " " + pegs[0]._pegBody.Position.Y );
-
-			_oldMouseState = state;
+			oldMouseState = state;
 		}
 
 		private void HandleKeyboard(GameTime gameTime)
 		{
 			KeyboardState state = Keyboard.GetState();
 			float totalSeconds = (float)gameTime.ElapsedGameTime.TotalSeconds;
-
-			/*
-			// Move Camera
-			if (state.IsKeyDown(Keys.Left))
-				_cameraPosition.X -= totalSeconds * cameraViewWidth;
-
-			if (state.IsKeyDown(Keys.Right))
-				_cameraPosition.X += totalSeconds * cameraViewWidth;
-
-			if (state.IsKeyDown(Keys.Up))
-				_cameraPosition.Y += totalSeconds * cameraViewWidth;
-
-			if (state.IsKeyDown(Keys.Down))
-				_cameraPosition.Y -= totalSeconds * cameraViewWidth;
-			*/
 			
-			// Move arrow
+			// Aim the arrow
 			if (state.IsKeyDown(Keys.Left))
 				shooter.moveLeft(totalSeconds);
 
@@ -177,36 +114,29 @@ namespace PeggleAI
 				shooter.moveRight(totalSeconds);
 
 			// Shoot ball
-			if (state.IsKeyDown(Keys.Space) && _oldKbState.IsKeyUp(Keys.Space))
+			if (state.IsKeyDown(Keys.Space) && oldKbState.IsKeyUp(Keys.Space))
 				shooter.shoot();
 
-			// Rotate player
-			if (state.IsKeyDown(Keys.A))
-				_playerBody.ApplyTorque(10);
+			//_playerBody.ApplyLinearImpulse(new Vector2(0, 10));
 
-			if (state.IsKeyDown(Keys.D))
-				_playerBody.ApplyTorque(-10);
-
-			if (state.IsKeyDown(Keys.Space) && _oldKbState.IsKeyUp(Keys.Space))
-				_playerBody.ApplyLinearImpulse(new Vector2(0, 10));
-
-			_oldKbState = state;
+			oldKbState = state;
 		}
 
 		public override void Draw(GameTime gameTime)
 		{
 			// Update camera View and Projection
 			var vp = GraphicsDevice.Viewport;
-			_spriteBatchEffect.View = Matrix.CreateLookAt(_cameraPosition, _cameraPosition + Vector3.Forward, Vector3.Up);
-			_spriteBatchEffect.Projection = Matrix.CreateOrthographic(cameraViewWidth, cameraViewWidth / vp.AspectRatio, 0f, -1f);
+			spriteBatchEffect.View = Matrix.CreateLookAt(cameraPosition, cameraPosition + Vector3.Forward, Vector3.Up);
+			spriteBatchEffect.Projection = Matrix.CreateOrthographic(cameraViewWidth, cameraViewWidth / vp.AspectRatio, 0f, -1f);
 
 			// Draw player and ground. 
 			// Our View/Projection requires RasterizerState.CullClockwise and SpriteEffects.FlipVertically.
-			_spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, RasterizerState.CullClockwise, _spriteBatchEffect);
+			spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, RasterizerState.CullClockwise, spriteBatchEffect);
 
-			Microsoft.Xna.Framework.Vector2 bgPos = new Microsoft.Xna.Framework.Vector2(_bg.Width/2f, _bg.Height/2f);
-			_spriteBatch.Draw(
-				_bg,
+			// Draw the background
+			Microsoft.Xna.Framework.Vector2 bgPos = new Microsoft.Xna.Framework.Vector2(background.Width/2f, background.Height/2f);
+			spriteBatch.Draw(
+				background,
 				Microsoft.Xna.Framework.Vector2.Zero,
 				null,
 				Color.White,
@@ -217,43 +147,18 @@ namespace PeggleAI
 				0f
 			);
 
-			Vector2 playerTextureScale = new Vector2( (_playerBodyRadius * 2f) / _playerTextureSize.X, (_playerBodyRadius * 2f) / _playerTextureSize.Y);
-			Vector2 groundTextureScale = new Vector2(_groundBodySize.X / _groundTextureSize.X, _groundBodySize.Y / _groundTextureSize.Y);
-			/*
-			_spriteBatch.Draw(
-				_playerTexture, 
-				convertVec(_playerBody.Position), 
-				null, 
-				Color.White, 
-				_playerBody.Rotation, 
-				convertVec(_playerTextureOrigin), 
-				convertVec(playerTextureScale), 
-				SpriteEffects.FlipVertically, 
-				0f
-			);
-
-			_spriteBatch.Draw(
-				_groundTexture, 
-				convertVec(_groundBody.Position), 
-				null, 
-				Color.White, 
-				_groundBody.Rotation, 
-				convertVec(_groundTextureOrigin), 
-				convertVec(groundTextureScale), 
-				SpriteEffects.FlipVertically, 
-				0f
-			);
-			*/
-
+			// Draw each peg
 			foreach(Peg peg in pegs)
-				peg.draw(_spriteBatch);
+				peg.draw(spriteBatch);
 
-			shooter.draw(_spriteBatch);
+			// Draw the ball shooter
+			shooter.draw(spriteBatch);
 
-			_spriteBatch.End();
+			spriteBatch.End();
 		}
 
 		// For some reason I need to convert between Aether2D vectors to Microsoft Vectors manually
+		// This method is used by game objects such as pegs and balls when drawing
 		public static Microsoft.Xna.Framework.Vector2 convertVec(Vector2 aetherVec)
 		{
 			return new Microsoft.Xna.Framework.Vector2(aetherVec.X, aetherVec.Y);

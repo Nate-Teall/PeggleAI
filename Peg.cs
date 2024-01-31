@@ -13,49 +13,56 @@ namespace PeggleAI
     {
 
         // Sprites
-        private static Texture2D _pegTexture;
-        private Vector2 _pegTextureSize;
-        private Vector2 _pegTextureOrigin;
-        private Vector2 _pegTextureScale;
+        private static Texture2D pegTexture;
+        private static Vector2 pegTextureSize;
+        private static Vector2 pegTextureOrigin;
+        private static Vector2 pegTextureScale;
 
         // Physics
-        private World _world;
-        private float _pegRadius = 0.15f;
-        public Body _pegBody { get; }
+        private static World world;
+        private static float pegRadius = 0.15f;
+        public Body pegBody { get; }
 
-        public Peg(World world, float x, float y)
+        public Peg(float x, float y)
         {
-            this._world = world;
-
             Vector2 pegPosition = new Vector2(x, y);
 
-            _pegBody = _world.CreateBody(pegPosition, 0, BodyType.Static);
-            var p_fixture = _pegBody.CreateCircle(_pegRadius, 1f);
+            pegBody = world.CreateBody(pegPosition, 0, BodyType.Static);
+
+            // Fixtures are what binds a shape to a body for collision.
+            var p_fixture = pegBody.CreateCircle(pegRadius, 1f);
+            // Fixtures hold data for bounciness and friction as well
             p_fixture.Restitution = 0.6f;
             p_fixture.Friction = 0.1f;
         }
 
-        public void loadContent(Texture2D pegTexture)
+        public static void loadContent(Texture2D pegTexture, World world)
         {
-            _pegTexture = pegTexture;
-            _pegTextureSize = new Vector2(_pegTexture.Width, _pegTexture.Height);
-            _pegTextureOrigin = _pegTextureSize / 2f;
-            _pegTextureScale = new Vector2(
-                (_pegRadius * 2f) / _pegTextureSize.X, 
-                (_pegRadius * 2f) / _pegTextureSize.Y
+            Peg.pegTexture = pegTexture;
+            Peg.world = world;
+
+            // Scale the texture to the collision body dimensions
+            Peg.pegTextureSize = new Vector2(pegTexture.Width, pegTexture.Height);
+            Peg.pegTextureScale = new Vector2(
+                (pegRadius * 2f) / pegTextureSize.X, 
+                (pegRadius * 2f) / pegTextureSize.Y
             );
+
+            // Draw the texture at the center of the shapes
+            Peg.pegTextureOrigin = pegTextureSize / 2f;
+
         }
 
         public void draw(SpriteBatch spriteBatch)
         {
             spriteBatch.Draw(
-                   _pegTexture,
-                   LevelComponent.convertVec(_pegBody.Position),
+                   pegTexture,
+                   LevelComponent.convertVec(pegBody.Position),
                    null,
                    Color.Blue,
-                   _pegBody.Rotation,
-                   LevelComponent.convertVec(_pegTextureOrigin),
-                   LevelComponent.convertVec(_pegTextureScale),
+                   pegBody.Rotation,
+                   LevelComponent.convertVec(pegTextureOrigin),
+                   LevelComponent.convertVec(pegTextureScale),
                    SpriteEffects.FlipVertically,
                    0f
             );

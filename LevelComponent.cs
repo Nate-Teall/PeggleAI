@@ -31,8 +31,8 @@ namespace PeggleAI
 		private MouseState _oldMouseState;
 
 		// Camera
-		private Vector3 _cameraPosition = new Vector3(0, 0, 0); // Camera is 1.7 meters above the ground
-		float cameraViewWidth = 12.5f; // Camera is 12.5 meters wide
+		private Vector3 _cameraPosition = new Vector3(0, 0, 0);
+		float cameraViewWidth = 12.5f; // Camera view is 12.5 units wide
 
 		// Physics
 		private World _world;
@@ -168,6 +168,12 @@ namespace PeggleAI
 				_cameraPosition.Y -= totalSeconds * cameraViewWidth;
 			*/
 			
+			// Move arrow
+			if (state.IsKeyDown(Keys.Left))
+				shooter.moveLeft(totalSeconds);
+
+			if (state.IsKeyDown(Keys.Right))
+				shooter.moveRight(totalSeconds);
 
 			// Rotate player
 			if (state.IsKeyDown(Keys.A))

@@ -16,11 +16,28 @@ namespace PeggleAI
 
         private float rotation;
 
+        private const float ROTATION_SPEED = 1f;
+        // Max angle the arrow can point left/right
+        private const float MAX_LEFT = (float)(Math.PI / 2);
+        private const float MAX_RIGHT = (float)(3 * Math.PI / 2);
+
         public BallShooter(Texture2D texture)
         {   
             this.arrowTexture = texture;
             this.arrowOrigin = new Vector2( arrowTexture.Width/2f, 0 );
             this.rotation = (float)Math.PI;
+        }
+
+        public void moveLeft(float totalSeconds)
+        {
+            float newAngle = rotation - ROTATION_SPEED * totalSeconds;
+            rotation = newAngle < MAX_LEFT ? MAX_LEFT : newAngle;
+        }
+
+        public void moveRight(float totalSeconds)
+        {
+            float newAngle = rotation + ROTATION_SPEED * totalSeconds;
+            rotation = newAngle > MAX_RIGHT ? MAX_RIGHT : newAngle;
         }
 
         public void draw(SpriteBatch spriteBatch)

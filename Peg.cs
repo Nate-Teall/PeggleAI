@@ -21,7 +21,9 @@ namespace PeggleAI
         // Physics
         private static World world;
         private static float pegRadius = 0.15f;
-        public Body pegBody { get; }
+        private Body pegBody;
+        private const float PEG_BOUNCINESS = 0.6f;
+        private const float PEG_FRICTION = 0.1f;
 
         public Peg(float x, float y)
         {
@@ -32,8 +34,8 @@ namespace PeggleAI
             // Fixtures are what binds a shape to a body for collision.
             var p_fixture = pegBody.CreateCircle(pegRadius, 1f);
             // Fixtures hold data for bounciness and friction as well
-            p_fixture.Restitution = 0.6f;
-            p_fixture.Friction = 0.1f;
+            p_fixture.Restitution = PEG_BOUNCINESS;
+            p_fixture.Friction = PEG_FRICTION;
         }
 
         public static void loadContent(Texture2D pegTexture, World world)

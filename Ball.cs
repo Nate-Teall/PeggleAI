@@ -18,19 +18,26 @@ namespace PeggleAI
 
         // Physics
         private static World world;
-        private static float ballRadius = 0.1f;
-        public Body ballBody;
+        private static float ballRadius = 0.125f;
+        private Body ballBody;
+        private const float BALL_SPEED = 0.5f;
+        private const float BALL_BOUNCINESS = 0.6f;
+        private const float BALL_FRICTION = 0.1f;
 
         
-        public Ball(float x, float y)
+        public Ball(float x, float y, float rotation)
         {
 
             Vector2 ballPosition = new Vector2(x, y);
 
             ballBody = world.CreateBody(ballPosition, 0, BodyType.Dynamic);
             var p_fixture = ballBody.CreateCircle(ballRadius, 1f);
-            p_fixture.Restitution = 0.6f;
-            p_fixture.Friction = 0.1f;
+            p_fixture.Restitution = BALL_BOUNCINESS;
+            p_fixture.Friction = BALL_FRICTION;
+
+            // When the ball is spawned, give it some velocity in the direction the player is aiming
+            Vector2 ballVelocity = new Vector2((float)Math.Sin(rotation) * -1, (float)Math.Cos(rotation));
+            ballBody.ApplyLinearImpulse( ballVelocity * BALL_SPEED);
         }
 
         public static void loadContent(Texture2D ballTexture, World world)

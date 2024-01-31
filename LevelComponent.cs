@@ -117,8 +117,6 @@ namespace PeggleAI
 			if (state.IsKeyDown(Keys.Space) && oldKbState.IsKeyUp(Keys.Space))
 				shooter.shoot();
 
-			//_playerBody.ApplyLinearImpulse(new Vector2(0, 10));
-
 			oldKbState = state;
 		}
 

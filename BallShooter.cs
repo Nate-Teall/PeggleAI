@@ -16,6 +16,8 @@ namespace PeggleAI
 
         private float rotation;
 
+        private Ball? ball;
+
         private const float ROTATION_SPEED = 1f;
         // Max angle the arrow can point left/right
         private const float MAX_LEFT = (float)(Math.PI / 2);
@@ -40,6 +42,11 @@ namespace PeggleAI
             rotation = newAngle > MAX_RIGHT ? MAX_RIGHT : newAngle;
         }
 
+        public void shoot()
+        {
+            this.ball = new Ball(0, 3.6f);
+        }
+
         public void draw(SpriteBatch spriteBatch)
         {
             spriteBatch.Draw(
@@ -53,6 +60,9 @@ namespace PeggleAI
                    SpriteEffects.None,
                    0f
             );
+
+            if (ball is not null)
+                ball.draw(spriteBatch);
         }
 
     }

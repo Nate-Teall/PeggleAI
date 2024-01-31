@@ -110,6 +110,7 @@ namespace PeggleAI
 				peg.loadContent(_playerTexture);
 
 			shooter = new BallShooter(_arrowTexture);
+			Ball.loadContent(_playerTexture, _world);
 		}
 
 		private void loadLevel()
@@ -174,6 +175,10 @@ namespace PeggleAI
 
 			if (state.IsKeyDown(Keys.Right))
 				shooter.moveRight(totalSeconds);
+
+			// Shoot ball
+			if (state.IsKeyDown(Keys.Space) && _oldKbState.IsKeyUp(Keys.Space))
+				shooter.shoot();
 
 			// Rotate player
 			if (state.IsKeyDown(Keys.A))

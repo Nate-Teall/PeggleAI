@@ -2,7 +2,6 @@ using System;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 
 using nkast.Aether.Physics2D.Dynamics;
 using Vector2 = nkast.Aether.Physics2D.Common.Vector2;
@@ -17,7 +16,7 @@ namespace PeggleAI
         private static Texture2D _pegTexture;
         private Vector2 _pegTextureSize;
         private Vector2 _pegTextureOrigin;
-        Vector2 _pegTextureScale;
+        private Vector2 _pegTextureScale;
 
         // Physics
         private World _world;

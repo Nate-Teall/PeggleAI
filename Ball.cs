@@ -21,7 +21,7 @@ namespace PeggleAI
         private static float ballRadius = 0.125f;
         private Body ballBody;
         private const float BALL_SPEED = 0.5f;
-        private const float BALL_BOUNCINESS = 0.6f;
+        private const float BALL_BOUNCINESS = 0.7f;
         private const float BALL_FRICTION = 0.1f;
 
         

@@ -16,7 +16,7 @@ namespace PeggleAI
 
         private float rotation;
 
-        private Ball? ball;
+        private Ball ball;
 
         private const float ROTATION_SPEED = 1f;
         // Max angle the arrow can point left/right
@@ -29,6 +29,8 @@ namespace PeggleAI
             this.arrowOrigin = new Vector2( arrowTexture.Width/2f, 0 );
             this.rotation = (float)Math.PI;
         }
+
+        public Ball getBall() { return this.ball; }
 
         public void moveLeft(float totalSeconds)
         {

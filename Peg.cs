@@ -4,6 +4,8 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 using nkast.Aether.Physics2D.Dynamics;
+using nkast.Aether.Physics2D.Dynamics.Contacts;
+
 using Vector2 = nkast.Aether.Physics2D.Common.Vector2;
 
 namespace PeggleAI
@@ -21,7 +23,8 @@ namespace PeggleAI
         // Physics
         private static World world;
         private static float pegRadius = 0.15f;
-        private Body pegBody;
+        public Body pegBody { get; private set; }
+        private Fixture pegFixture;
         private const float PEG_BOUNCINESS = 0.6f;
         private const float PEG_FRICTION = 0.1f;
 
@@ -32,10 +35,13 @@ namespace PeggleAI
             pegBody = world.CreateBody(pegPosition, 0, BodyType.Static);
 
             // Fixtures are what binds a shape to a body for collision.
-            var p_fixture = pegBody.CreateCircle(pegRadius, 1f);
+            pegFixture = pegBody.CreateCircle(pegRadius, 1f);
             // Fixtures hold data for bounciness and friction as well
-            p_fixture.Restitution = PEG_BOUNCINESS;
-            p_fixture.Friction = PEG_FRICTION;
+            pegFixture.Restitution = PEG_BOUNCINESS;
+            pegFixture.Friction = PEG_FRICTION;
+
+            pegBody.OnCollision += OnCollision;
+            pegBody.OnSeparation += OnSeparation;
         }
 
         public static void loadContent(Texture2D pegTexture, World world)
@@ -55,18 +61,28 @@ namespace PeggleAI
 
         }
 
+        public bool OnCollision(Fixture sender, Fixture other, Contact contact)
+        {
+            return true;
+        }
+
+        public void OnSeparation(Fixture sender, Fixture other, Contact contact)
+        {
+            LevelComponent.pegsHit.Enqueue(this);
+        }
+
         public void draw(SpriteBatch spriteBatch)
         {
             spriteBatch.Draw(
-                   pegTexture,
-                   LevelComponent.convertVec(pegBody.Position),
-                   null,
-                   Color.Blue,
-                   pegBody.Rotation,
-                   LevelComponent.convertVec(pegTextureOrigin),
-                   LevelComponent.convertVec(pegTextureScale),
-                   SpriteEffects.FlipVertically,
-                   0f
+                pegTexture,
+                LevelComponent.convertVec(pegBody.Position),
+                null,
+                Color.Blue,
+                pegBody.Rotation,
+                LevelComponent.convertVec(pegTextureOrigin),
+                LevelComponent.convertVec(pegTextureScale),
+                SpriteEffects.FlipVertically,
+                0f
             );
         }
 

@@ -34,6 +34,8 @@ namespace PeggleAI
 		private List<Peg> pegs;
 		private BallShooter shooter;
 
+		public static Queue<Peg> pegsHit = new Queue<Peg>();
+
 		public LevelComponent(Game game) : base(game)
 		{
 
@@ -67,6 +69,10 @@ namespace PeggleAI
 			// Create all of the level objects
 			loadLevel();
 			shooter = new BallShooter(arrowTexture);
+
+			// Need a fixture for sender and other, and a Contact?
+			//nkast.Aether.Physics2D.Dynamics.OnCollisionEventHandler.
+
 		}
 
 		private void loadLevel()
@@ -89,6 +95,15 @@ namespace PeggleAI
 			// Input
 			HandleKeyboard(gameTime);
 			//HandleMouse();
+
+			// Before stepping, remove each peg that was hit.
+			Peg peg;
+			while (pegsHit.Count > 0)
+			{
+				peg = pegsHit.Dequeue();
+				world.Remove(peg.pegBody);
+				pegs.Remove(peg); // BAD BAD DONT DO THAT
+			}
 
 			// Update world 
 			world.Step((float)gameTime.ElapsedGameTime.TotalSeconds);

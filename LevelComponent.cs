@@ -35,6 +35,8 @@ namespace PeggleAI
 		private HashSet<Peg> pegs;
 		private BallShooter shooter;
 		private OffScreenBox offScreenBox;
+		private Wall lWall;
+		private Wall rWall;
 
 		// This variable tracks if the player has shot the ball.
 		// If so, the player should not be able to shoot until the turn is finished
@@ -72,6 +74,7 @@ namespace PeggleAI
 			Texture2D arrowTexture = Game.Content.Load<Texture2D>("Arrow");
 			Texture2D bluePegTexture = Game.Content.Load<Texture2D>("BluePeg");
 			Texture2D orangePegTexture = Game.Content.Load<Texture2D>("OrangePeg");
+			Texture2D wallTexture = Game.Content.Load<Texture2D>("GroundSprite");
 
 			// Call loadContent to give each game object the textures they need
 			Peg.loadContent(bluePegTexture, orangePegTexture, world);
@@ -80,7 +83,9 @@ namespace PeggleAI
 			// Create all of the level objects
 			loadLevel();
 			shooter = new BallShooter(arrowTexture, this);
-			offScreenBox = new OffScreenBox(0, -6f, world, this);
+			offScreenBox = new OffScreenBox(0, -6, world, this);
+			lWall = new Wall(-5.25f, 0, world);
+			rWall = new Wall(5.25f, 0, world);
 
 		}
 
@@ -174,7 +179,7 @@ namespace PeggleAI
 			spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, RasterizerState.CullClockwise, spriteBatchEffect);
 
 			// Draw the background
-			Microsoft.Xna.Framework.Vector2 bgPos = new Microsoft.Xna.Framework.Vector2(background.Width/2f, background.Height/2f);
+			/*Microsoft.Xna.Framework.Vector2 bgPos = new Microsoft.Xna.Framework.Vector2(background.Width/2f, background.Height/2f);
 			spriteBatch.Draw(
 				background,
 				Microsoft.Xna.Framework.Vector2.Zero,
@@ -185,7 +190,7 @@ namespace PeggleAI
 				0.0125f,
 				SpriteEffects.FlipVertically,
 				0f
-			);
+			); */
 
 			// Draw each peg
 			foreach(Peg peg in pegs)

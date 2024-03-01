@@ -20,7 +20,7 @@ namespace PeggleAI
         private static World world;
         private static float ballRadius = 0.125f;
         public Body ballBody { get; private set; }
-        private const float BALL_SPEED = 0.5f;
+        private const float BALL_SPEED = 0.4f;
         private const float BALL_BOUNCINESS = 0.7f;
         private const float BALL_FRICTION = 0.1f;
         

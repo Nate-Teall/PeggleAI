@@ -25,16 +25,21 @@ namespace PeggleAI
 		// Camera
 		private Vector3 cameraPosition = new Vector3(0, 0, 0);
 		float cameraViewWidth = 12.5f;
+		private Vector2 cameraView;
 
 		// Physics
 		private World world;
 
 		// Level Objects
 		private Texture2D background;
-		private List<Peg> pegs;
+		private HashSet<Peg> pegs;
 		private BallShooter shooter;
+		private OffScreenBox offScreenBox;
 
-		public static Queue<Peg> pegsHit = new Queue<Peg>();
+		// This variable tracks if the player has shot the ball.
+		// If so, the player should not be able to shoot until the turn is finished
+		public bool ballShot { get; set; } 
+		public Queue<Peg> pegsHit = new Queue<Peg>();
 
 		public LevelComponent(Game game) : base(game)
 		{
@@ -45,6 +50,11 @@ namespace PeggleAI
 		{
 			// Create a new world that holds all physics information
 			world = new World();
+			ballShot = false;
+
+			// Get the width and height of the screen
+			var vp = GraphicsDevice.Viewport;
+			cameraView = new Vector2(cameraViewWidth, cameraViewWidth / vp.AspectRatio);
 
 			base.Initialize();
 		}
@@ -60,18 +70,17 @@ namespace PeggleAI
 			Texture2D ballTexture = Game.Content.Load<Texture2D>("CircleSprite");
             background = Game.Content.Load<Texture2D>("Level1");
 			Texture2D arrowTexture = Game.Content.Load<Texture2D>("Arrow");
+			Texture2D groundTexture = Game.Content.Load<Texture2D>("GroundSprite");
 
 			// Call loadContent to give each game object the textures they need
-			// TODO: make peg.loadContent a static method
 			Peg.loadContent(ballTexture, world);
 			Ball.loadContent(ballTexture, world);
+			OffScreenBox.loadContent(groundTexture);
 
 			// Create all of the level objects
 			loadLevel();
-			shooter = new BallShooter(arrowTexture);
-
-			// Need a fixture for sender and other, and a Contact?
-			//nkast.Aether.Physics2D.Dynamics.OnCollisionEventHandler.
+			shooter = new BallShooter(arrowTexture, this);
+			offScreenBox = new OffScreenBox(world, this);
 
 		}
 
@@ -81,11 +90,11 @@ namespace PeggleAI
 			string[] pegPositions = File.ReadAllLines("../../../Level1.txt");
 
 			// Create all of the pegs in the level
-			pegs = new List<Peg>();
+			pegs = new HashSet<Peg>();
 			foreach (string position in pegPositions)
 			{
 				string[] pos = position.Split(' ');
-				pegs.Add( new Peg(float.Parse(pos[0]), float.Parse(pos[1])) );
+				pegs.Add( new Peg(float.Parse(pos[0]), float.Parse(pos[1]), this) );
 			}
 			
 		}
@@ -96,16 +105,27 @@ namespace PeggleAI
 			HandleKeyboard(gameTime);
 			//HandleMouse();
 
-			// Before stepping, remove each peg that was hit.
-			Peg peg;
-			while (pegsHit.Count > 0)
+			// If the turn has ended, remove the ball and all the pegs that have been hit
+			if(ballShot == false)
 			{
-				peg = pegsHit.Dequeue();
-				world.Remove(peg.pegBody);
-				pegs.Remove(peg); // BAD BAD DONT DO THAT
-			}
+				shooter.removeBall(world);
 
-			// Update world 
+				Peg peg;
+				while (pegsHit.Count > 0)
+				{
+					peg = pegsHit.Dequeue();
+
+					// This is necessary to avoid attepting to remove the same peg from the world twice
+					if (pegs.Contains(peg))
+					{
+						world.Remove(peg.pegBody);
+						pegs.Remove(peg);
+					}
+					
+				}
+			}
+			
+			// Otherwise, update physics world
 			world.Step((float)gameTime.ElapsedGameTime.TotalSeconds);
 		}
 
@@ -129,8 +149,11 @@ namespace PeggleAI
 				shooter.moveRight(totalSeconds);
 
 			// Shoot ball
-			if (state.IsKeyDown(Keys.Space) && oldKbState.IsKeyUp(Keys.Space))
+			if (!ballShot && state.IsKeyDown(Keys.Space) && oldKbState.IsKeyUp(Keys.Space)) 
+			{
 				shooter.shoot();
+				ballShot = true;
+			}
 
 			oldKbState = state;
 		}
@@ -166,6 +189,8 @@ namespace PeggleAI
 
 			// Draw the ball shooter
 			shooter.draw(spriteBatch);
+
+			offScreenBox.draw(spriteBatch);
 
 			spriteBatch.End();
 		}

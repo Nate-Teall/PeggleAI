@@ -13,6 +13,10 @@ namespace PeggleAI
 
     public class Peg
     {
+        // Keep a reference to the level that this peg belongs to.
+        // This will be helpful when we have multiple instances of the game running at once
+        // during the algorithm
+        private LevelComponent level;
 
         // Sprites
         private static Texture2D pegTexture;
@@ -28,8 +32,10 @@ namespace PeggleAI
         private const float PEG_BOUNCINESS = 0.6f;
         private const float PEG_FRICTION = 0.1f;
 
-        public Peg(float x, float y)
+        public Peg(float x, float y, LevelComponent level)
         {
+            this.level = level;
+
             Vector2 pegPosition = new Vector2(x, y);
 
             pegBody = world.CreateBody(pegPosition, 0, BodyType.Static);
@@ -68,7 +74,7 @@ namespace PeggleAI
 
         public void OnSeparation(Fixture sender, Fixture other, Contact contact)
         {
-            LevelComponent.pegsHit.Enqueue(this);
+            level.pegsHit.Enqueue(this);
         }
 
         public void draw(SpriteBatch spriteBatch)
@@ -85,7 +91,6 @@ namespace PeggleAI
                 0f
             );
         }
-
 
     }
 }

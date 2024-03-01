@@ -19,10 +19,12 @@ namespace PeggleAI
         private LevelComponent level;
 
         // Sprites
-        private static Texture2D pegTexture;
+        private static Texture2D bluePegTexture;
+        private static Texture2D orangePegTexture;
         private static Vector2 pegTextureSize;
         private static Vector2 pegTextureOrigin;
         private static Vector2 pegTextureScale;
+        private Texture2D currentTexture;
 
         // Physics
         private static World world;
@@ -32,9 +34,18 @@ namespace PeggleAI
         private const float PEG_BOUNCINESS = 0.6f;
         private const float PEG_FRICTION = 0.1f;
 
-        public Peg(float x, float y, LevelComponent level)
+        public Peg(float x, float y, LevelComponent level, bool isOrange)
         {
             this.level = level;
+            if (isOrange)
+            {
+                this.currentTexture = Peg.orangePegTexture;
+            } 
+            else
+            {
+                this.currentTexture = Peg.bluePegTexture;
+            }
+            
 
             Vector2 pegPosition = new Vector2(x, y);
 
@@ -50,13 +61,14 @@ namespace PeggleAI
             pegBody.OnSeparation += OnSeparation;
         }
 
-        public static void loadContent(Texture2D pegTexture, World world)
+        public static void loadContent(Texture2D bluePegTexture, Texture2D orangePegTexture, World world)
         {
-            Peg.pegTexture = pegTexture;
+            Peg.bluePegTexture = bluePegTexture;
+            Peg.orangePegTexture = orangePegTexture;
             Peg.world = world;
 
             // Scale the texture to the collision body dimensions
-            Peg.pegTextureSize = new Vector2(pegTexture.Width, pegTexture.Height);
+            Peg.pegTextureSize = new Vector2(bluePegTexture.Width, bluePegTexture.Height);
             Peg.pegTextureScale = new Vector2(
                 (pegRadius * 2f) / pegTextureSize.X, 
                 (pegRadius * 2f) / pegTextureSize.Y
@@ -80,10 +92,10 @@ namespace PeggleAI
         public void draw(SpriteBatch spriteBatch)
         {
             spriteBatch.Draw(
-                pegTexture,
+                currentTexture,
                 LevelComponent.convertVec(pegBody.Position),
                 null,
-                Color.Blue,
+                Color.White,
                 pegBody.Rotation,
                 LevelComponent.convertVec(pegTextureOrigin),
                 LevelComponent.convertVec(pegTextureScale),

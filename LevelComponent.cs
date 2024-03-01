@@ -70,17 +70,17 @@ namespace PeggleAI
 			Texture2D ballTexture = Game.Content.Load<Texture2D>("CircleSprite");
             background = Game.Content.Load<Texture2D>("Level1");
 			Texture2D arrowTexture = Game.Content.Load<Texture2D>("Arrow");
-			Texture2D groundTexture = Game.Content.Load<Texture2D>("GroundSprite");
+			Texture2D bluePegTexture = Game.Content.Load<Texture2D>("BluePeg");
+			Texture2D orangePegTexture = Game.Content.Load<Texture2D>("OrangePeg");
 
 			// Call loadContent to give each game object the textures they need
-			Peg.loadContent(ballTexture, world);
+			Peg.loadContent(bluePegTexture, orangePegTexture, world);
 			Ball.loadContent(ballTexture, world);
-			OffScreenBox.loadContent(groundTexture);
 
 			// Create all of the level objects
 			loadLevel();
 			shooter = new BallShooter(arrowTexture, this);
-			offScreenBox = new OffScreenBox(world, this);
+			offScreenBox = new OffScreenBox(0, -6f, world, this);
 
 		}
 
@@ -91,10 +91,13 @@ namespace PeggleAI
 
 			// Create all of the pegs in the level
 			pegs = new HashSet<Peg>();
+			bool isOrange;
 			foreach (string position in pegPositions)
 			{
 				string[] pos = position.Split(' ');
-				pegs.Add( new Peg(float.Parse(pos[0]), float.Parse(pos[1]), this) );
+				// Lines have the X pos, Y pos, and wether the peg is orange or blue				
+				isOrange = pos[2] == "O"? true : false;
+				pegs.Add( new Peg(float.Parse(pos[0]), float.Parse(pos[1]), this, isOrange) );
 			}
 			
 		}
@@ -106,6 +109,7 @@ namespace PeggleAI
 			//HandleMouse();
 
 			// If the turn has ended, remove the ball and all the pegs that have been hit
+			// This will be checked every frame that the ball isn't active, may not be the best
 			if(ballShot == false)
 			{
 				shooter.removeBall(world);
@@ -189,8 +193,6 @@ namespace PeggleAI
 
 			// Draw the ball shooter
 			shooter.draw(spriteBatch);
-
-			offScreenBox.draw(spriteBatch);
 
 			spriteBatch.End();
 		}

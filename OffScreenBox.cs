@@ -13,22 +13,25 @@ namespace PeggleAI
     {
         private LevelComponent level;
 
+        // Textures are not necessary for this, but will remain commented in case I need to see the box for debugging 
+
+        /*
         private static Texture2D groundTexture;
         private static Vector2 groundTextureSize;
         private static Vector2 groundTextureOrigin;
         private static Vector2 groundTextureScale;
+        */
 
         private Body groundBody;
-        private static Vector2 groundBodySize = new Vector2(8f, 1f);
+        private static Vector2 groundBodySize = new Vector2(11f, 1f);
 
         // The OffScreenBox is a rectangle placed at the bottom of the camera view.
         // It is used to detect when the ball reaches the bottom of the screen, allowing the player to shoot again
-        public OffScreenBox(World world, LevelComponent level) 
+        public OffScreenBox(float x, float y, World world, LevelComponent level) 
         {
             this.level = level;
 
-            /* Ground */
-            Vector2 groundPosition = new Vector2(0, -(groundBodySize.Y / 2f));
+            Vector2 groundPosition = new Vector2(x, y);
 
             // Create the ground fixture
             groundBody = world.CreateBody(groundPosition, 0, BodyType.Static);
@@ -45,6 +48,7 @@ namespace PeggleAI
             return true;
         }
 
+        /*
         public static void loadContent(Texture2D groundTexture)
         {
             OffScreenBox.groundTexture = groundTexture;
@@ -70,5 +74,6 @@ namespace PeggleAI
                 0f
              );
         }
+        */
     }
 }

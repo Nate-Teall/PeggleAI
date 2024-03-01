@@ -25,6 +25,18 @@
 /processorParam:TextureFormat=Color
 /build:Arrow.png
 
+#begin BluePeg.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:BluePeg.png
+
 #begin CircleSprite.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -60,4 +72,16 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:Level1.png
+
+#begin OrangePeg.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:OrangePeg.png
 

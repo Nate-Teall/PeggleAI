@@ -32,6 +32,7 @@ namespace PeggleAI
 
 		// Level Objects
 		private Texture2D background;
+		private Texture2D backgroundNoPegs;
 		private HashSet<Peg> pegs;
 		private BallShooter shooter;
 		private OffScreenBox offScreenBox;
@@ -74,7 +75,6 @@ namespace PeggleAI
 			Texture2D arrowTexture = Game.Content.Load<Texture2D>("Arrow");
 			Texture2D bluePegTexture = Game.Content.Load<Texture2D>("BluePeg");
 			Texture2D orangePegTexture = Game.Content.Load<Texture2D>("OrangePeg");
-			Texture2D wallTexture = Game.Content.Load<Texture2D>("GroundSprite");
 
 			// Call loadContent to give each game object the textures they need
 			Peg.loadContent(bluePegTexture, orangePegTexture, world);
@@ -179,7 +179,7 @@ namespace PeggleAI
 			spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, RasterizerState.CullClockwise, spriteBatchEffect);
 
 			// Draw the background
-			/*Microsoft.Xna.Framework.Vector2 bgPos = new Microsoft.Xna.Framework.Vector2(background.Width/2f, background.Height/2f);
+			Microsoft.Xna.Framework.Vector2 bgPos = new Microsoft.Xna.Framework.Vector2(background.Width/2f, background.Height/2f);
 			spriteBatch.Draw(
 				background,
 				Microsoft.Xna.Framework.Vector2.Zero,
@@ -187,10 +187,10 @@ namespace PeggleAI
 				Color.White,
 				0f,
 				bgPos,
-				0.0125f,
+				0.0156f,
 				SpriteEffects.FlipVertically,
 				0f
-			); */
+			);
 
 			// Draw each peg
 			foreach(Peg peg in pegs)

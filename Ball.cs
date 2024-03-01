@@ -21,7 +21,7 @@ namespace PeggleAI
         private static float ballRadius = 0.125f;
         public Body ballBody { get; private set; }
         private const float BALL_SPEED = 0.4f;
-        private const float BALL_BOUNCINESS = 0.7f;
+        private const float BALL_BOUNCINESS = 0.6f;
         private const float BALL_FRICTION = 0.1f;
         
         public Ball(float x, float y, float rotation)
@@ -32,10 +32,6 @@ namespace PeggleAI
             var ballFixture = ballBody.CreateCircle(ballRadius, 1f);
             ballFixture.Restitution = BALL_BOUNCINESS;
             ballFixture.Friction = BALL_FRICTION;
-
-            // The offScreenBody is used to detect when a ball reaches the bottom of the screen
-            //offScreenBody = world.CreateBody(new Vector2(0, 0), 0, BodyType.Static);
-            //var offScreenFixture = offScreenBody.CreateRectangle(8, 1, 1f, Vector2.Zero);
 
             // When the ball is spawned, give it some velocity in the direction the player is aiming
             Vector2 ballVelocity = new Vector2((float)Math.Sin(rotation) * -1, (float)Math.Cos(rotation));

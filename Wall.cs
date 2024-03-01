@@ -23,6 +23,8 @@ namespace PeggleAI
 
         private Body wallBody;
         private static Vector2 wallBodySize = new Vector2(0.25f, 10f);
+        private static float WALL_BOUNCINESS = 0.8f;
+        private static float WALL_FRICTION = 0.0f;
 
         public Wall(float x, float y, World world)
         {
@@ -31,6 +33,9 @@ namespace PeggleAI
             // Create the wall fixture
             wallBody = world.CreateBody(wallPosition, 0, BodyType.Static);
             var wfixture = wallBody.CreateRectangle(wallBodySize.X, wallBodySize.Y, 1f, Vector2.Zero);
+
+            wfixture.Restitution = WALL_BOUNCINESS;
+            wfixture.Friction = WALL_FRICTION;
         }
 
         /*

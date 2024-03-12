@@ -12,7 +12,7 @@ using Vector2 = nkast.Aether.Physics2D.Common.Vector2;
 
 namespace PeggleAI
 { 
-	public class LevelComponent : DrawableGameComponent
+	public class LevelComponent
 	{
 		// Sprites
 		private SpriteBatch spriteBatch;
@@ -28,11 +28,10 @@ namespace PeggleAI
 		private Vector2 cameraView;
 
 		// Physics
-		private World world;
+		public World world { get; private set; }
 
 		// Level Objects
-		private Texture2D background;
-		private Texture2D backgroundNoPegs;
+		//private Texture2D background;
 		private HashSet<Peg> pegs;
 		private BallShooter shooter;
 		private OffScreenBox offScreenBox;
@@ -44,48 +43,25 @@ namespace PeggleAI
 		public bool ballShot { get; set; } 
 		public Queue<Peg> pegsHit = new Queue<Peg>();
 
-		public LevelComponent(Game game) : base(game)
-		{
-
-		}
-
-		public override void Initialize()
+		public LevelComponent()
 		{
 			// Create a new world that holds all physics information
 			world = new World();
 			ballShot = false;
 
-			// Get the width and height of the screen
-			var vp = GraphicsDevice.Viewport;
-			cameraView = new Vector2(cameraViewWidth, cameraViewWidth / vp.AspectRatio);
-
-			base.Initialize();
-		}
-
-		protected override void LoadContent()
-		{
-			spriteBatch = new SpriteBatch(Game.GraphicsDevice);
-			// BasicEffect is used with the camera
-			spriteBatchEffect = new BasicEffect(Game.GraphicsDevice);
-			spriteBatchEffect.TextureEnabled = true;
-
-			// Load sprites
-			Texture2D ballTexture = Game.Content.Load<Texture2D>("CircleSprite");
-            background = Game.Content.Load<Texture2D>("Level1");
-			Texture2D arrowTexture = Game.Content.Load<Texture2D>("Arrow");
-			Texture2D bluePegTexture = Game.Content.Load<Texture2D>("BluePeg");
-			Texture2D orangePegTexture = Game.Content.Load<Texture2D>("OrangePeg");
-
-			// Call loadContent to give each game object the textures they need
-			Peg.loadContent(bluePegTexture, orangePegTexture, world);
-			Ball.loadContent(ballTexture, world);
-
 			// Create all of the level objects
 			loadLevel();
-			shooter = new BallShooter(arrowTexture, this);
+			shooter = new BallShooter(this);
 			offScreenBox = new OffScreenBox(0, -6, world, this);
 			lWall = new Wall(-5.25f, 0, world);
 			rWall = new Wall(5.25f, 0, world);
+		}
+
+		public void Initialize()
+		{
+			// Create a new world that holds all physics information
+			world = new World();
+			ballShot = false;
 
 		}
 
@@ -107,7 +83,7 @@ namespace PeggleAI
 			
 		}
 
-		public override void Update(GameTime gameTime)
+		public void Update(GameTime gameTime)
 		{
 			// Input
 			HandleKeyboard(gameTime);
@@ -117,7 +93,7 @@ namespace PeggleAI
 			// This will be checked every frame that the ball isn't active, may not be the best
 			if(ballShot == false)
 			{
-				shooter.removeBall(world);
+				shooter.removeBall();
 
 				Peg peg;
 				while (pegsHit.Count > 0)
@@ -167,39 +143,14 @@ namespace PeggleAI
 			oldKbState = state;
 		}
 
-		public override void Draw(GameTime gameTime)
+		public void Draw(SpriteBatch spriteBatch)
 		{
-			// Update camera View and Projection
-			var vp = GraphicsDevice.Viewport;
-			spriteBatchEffect.View = Matrix.CreateLookAt(cameraPosition, cameraPosition + Vector3.Forward, Vector3.Up);
-			spriteBatchEffect.Projection = Matrix.CreateOrthographic(cameraViewWidth, cameraViewWidth / vp.AspectRatio, 0f, -1f);
-
-			// Draw player and ground. 
-			// Our View/Projection requires RasterizerState.CullClockwise and SpriteEffects.FlipVertically.
-			spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, RasterizerState.CullClockwise, spriteBatchEffect);
-
-			// Draw the background
-			Microsoft.Xna.Framework.Vector2 bgPos = new Microsoft.Xna.Framework.Vector2(background.Width/2f, background.Height/2f);
-			spriteBatch.Draw(
-				background,
-				Microsoft.Xna.Framework.Vector2.Zero,
-				null,
-				Color.White,
-				0f,
-				bgPos,
-				0.0156f,
-				SpriteEffects.FlipVertically,
-				0f
-			);
-
 			// Draw each peg
 			foreach(Peg peg in pegs)
 				peg.draw(spriteBatch);
 
 			// Draw the ball shooter
 			shooter.draw(spriteBatch);
-
-			spriteBatch.End();
 		}
 
 		// For some reason I need to convert between Aether2D vectors to Microsoft Vectors manually

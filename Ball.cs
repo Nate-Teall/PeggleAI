@@ -17,14 +17,13 @@ namespace PeggleAI
         private static Vector2 ballTextureScale;
 
         // Physics
-        private static World world;
         private static float ballRadius = 0.125f;
         public Body ballBody { get; private set; }
         private const float BALL_SPEED = 0.4f;
         private const float BALL_BOUNCINESS = 0.6f;
         private const float BALL_FRICTION = 0.1f;
         
-        public Ball(float x, float y, float rotation)
+        public Ball(float x, float y, float rotation, World world)
         {
             Vector2 ballPosition = new Vector2(x, y);
 
@@ -39,10 +38,9 @@ namespace PeggleAI
         
         }
 
-        public static void loadContent(Texture2D ballTexture, World world)
+        public static void loadContent(Texture2D ballTexture)
         {
             Ball.ballTexture = ballTexture;
-            Ball.world = world;
 
             Ball.ballTextureSize = new Vector2(ballTexture.Width, ballTexture.Height);
             Ball.ballTextureScale = new Vector2(

@@ -18,8 +18,8 @@ namespace PeggleAI
         // during the algorithm
         private LevelComponent level;
 
-        private Texture2D arrowTexture;
-        private Vector2 arrowOrigin;
+        private static Texture2D arrowTexture;
+        private static Vector2 arrowOrigin;
 
         private float rotation;
 
@@ -33,11 +33,9 @@ namespace PeggleAI
         private static float MAX_LEFT_RAD = (float)(Math.PI * MAX_LEFT_DEG / 180.0);
         private static float MAX_RIGHT_RAD = (float)(Math.PI * MAX_RIGHT_DEG / 180.0);
 
-        public BallShooter(Texture2D texture, LevelComponent level)
+        public BallShooter(LevelComponent level)
         {
             this.level = level;
-            this.arrowTexture = texture;
-            this.arrowOrigin = new Vector2(arrowTexture.Width / 2f, 0);
             this.rotation = (float)Math.PI;
         }
 
@@ -46,6 +44,12 @@ namespace PeggleAI
         public static int getMaxLeft() { return MAX_LEFT_DEG; }
 
         public static int getMaxRight() { return MAX_RIGHT_DEG; }
+
+        public static void loadContent(Texture2D texture)
+        {
+            BallShooter.arrowTexture = texture;
+            BallShooter.arrowOrigin = new Vector2(arrowTexture.Width / 2f, 0);
+        }
 
         public void moveLeft(float totalSeconds)
         {
@@ -61,14 +65,14 @@ namespace PeggleAI
 
         public void shoot()
         {
-            this.ball = new Ball(0, 3.6f, rotation);
+            this.ball = new Ball(0, 3.6f, rotation, level.world);
         }
 
-        public void removeBall(World world)
+        public void removeBall()
         {
             if (ball != null)
             {
-                world.Remove(ball.ballBody);
+                level.world.Remove(ball.ballBody);
                 ball = null;
             }
         }

@@ -27,29 +27,36 @@ namespace PeggleAI
 
         private const float ROTATION_SPEED = 1f;
         // Max angle the arrow can point left/right
-        private const float MAX_LEFT = (float)(Math.PI / 2);
-        private const float MAX_RIGHT = (float)(3 * Math.PI / 2);
+        // Can aim between 90 and 270 degrees. Must be converted to radians.
+        private static int MAX_LEFT_DEG = 90;
+        private static int MAX_RIGHT_DEG = 270;
+        private static float MAX_LEFT_RAD = (float)(Math.PI * MAX_LEFT_DEG / 180.0);
+        private static float MAX_RIGHT_RAD = (float)(Math.PI * MAX_RIGHT_DEG / 180.0);
 
         public BallShooter(Texture2D texture, LevelComponent level)
-        {   
+        {
             this.level = level;
             this.arrowTexture = texture;
-            this.arrowOrigin = new Vector2( arrowTexture.Width/2f, 0 );
+            this.arrowOrigin = new Vector2(arrowTexture.Width / 2f, 0);
             this.rotation = (float)Math.PI;
         }
 
         public Ball getBall() { return this.ball; }
 
+        public static int getMaxLeft() { return MAX_LEFT_DEG; }
+
+        public static int getMaxRight() { return MAX_RIGHT_DEG; }
+
         public void moveLeft(float totalSeconds)
         {
             float newAngle = rotation - ROTATION_SPEED * totalSeconds;
-            rotation = newAngle < MAX_LEFT ? MAX_LEFT : newAngle;
+            rotation = newAngle < MAX_LEFT_RAD ? MAX_LEFT_RAD : newAngle;
         }
 
         public void moveRight(float totalSeconds)
         {
             float newAngle = rotation + ROTATION_SPEED * totalSeconds;
-            rotation = newAngle > MAX_RIGHT ? MAX_RIGHT : newAngle;
+            rotation = newAngle > MAX_RIGHT_RAD ? MAX_RIGHT_RAD : newAngle;
         }
 
         public void shoot()
@@ -87,6 +94,5 @@ namespace PeggleAI
             if (ball is not null)
                 ball.draw(spriteBatch);
         }
-
     }
 }

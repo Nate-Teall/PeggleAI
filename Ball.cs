@@ -66,16 +66,6 @@ namespace PeggleAI
                 SpriteEffects.FlipVertically,
                 0f
             );
-            /*spriteBatch.Draw(
-                groundTexture, 
-                groundBody.Position, 
-                null, 
-                Color.White, 
-                _groundBody.Rotation, 
-                _groundTextureOrigin, 
-                _groundBodySize / _groundTextureSize, 
-                SpriteEffects.FlipVertically, 0f
-            );*/
         }
     }
 }

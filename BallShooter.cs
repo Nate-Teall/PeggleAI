@@ -68,6 +68,13 @@ namespace PeggleAI
             this.ball = new Ball(0, 3.6f, rotation, level.world);
         }
 
+        // This override will shoot the ball at a given angle, given in degrees
+        public void shoot(int angle)
+        {
+            float radAngle = (float)(Math.PI * angle / 180.0);
+            this.ball = new Ball(0, 3.6f, radAngle, level.world);
+        }
+
         public void removeBall()
         {
             if (ball != null)

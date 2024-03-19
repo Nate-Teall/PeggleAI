@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Microsoft.Xna.Framework;
 
 namespace PeggleAI
 {
@@ -12,9 +13,15 @@ namespace PeggleAI
     {
         Random random;
 
-        public PeggleAlgorithm()
+        private int populationSize;
+        // game handles the visuals of our algorithm running
+        private Game game;
+
+        public PeggleAlgorithm(Game game, int popSize)
         {
             random = new Random();
+            this.game = game;
+            populationSize = popSize;
         }
 
         // The random initial genomes will be any angle that the ball shooter can aim
@@ -24,26 +31,27 @@ namespace PeggleAI
             return random.Next(BallShooter.getMaxLeft(), BallShooter.getMaxRight() + 1);
         }
 
-        public List<int> generatePopulation(int size)
+        public int[] generatePopulation(int size)
         {
-            ArrayList<int> population = new List<int>();
+            int[] population = new int[size];
 
             for (int i=0; i<size; i++)
             {
-                population.Add(generateGenome());
+                population[i] = generateGenome();
             }
 
             return population;
         }
 
-        public int fitness(float genome)
+        public int fitness(int genome)
         {
+            // This function will launch the ball at a given angle, and return the result of the shot.
             return 0;
         }
 
         public int[] selectionPair(List<int> population)
         {
-            return new float[1];
+            return new int[1];
         }
 
         public int mutation(int genome)

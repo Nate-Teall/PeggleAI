@@ -14,7 +14,7 @@ namespace PeggleAI
         // The generatePopulation function will create an initial population of potential solutions.
         // This should be done by using the generateGenome function above.
         // The number of solutions within the population is given by the size parameter
-        List<T> generatePopulation(int size);
+        T[] generatePopulation(int size);
 
         // The fitness function takes in a singular genome as input.
         // Depending on the problem that is being solved, the fitness function will measure the performance of the given solution

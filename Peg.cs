@@ -27,7 +27,6 @@ namespace PeggleAI
         private bool isOrange;
 
         // Physics
-        private World world;
         private static float pegRadius = 0.15f;
         public Body pegBody { get; private set; }
         private Fixture pegFixture;

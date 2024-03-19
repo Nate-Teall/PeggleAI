@@ -1,5 +1,5 @@
 ﻿using System.Diagnostics;
-
+using System.Security.AccessControl;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -10,19 +10,21 @@ namespace PeggleAI
     {
         private GraphicsDeviceManager graphics;
 
-        private LevelComponent level;
-
         private SpriteBatch spriteBatch;
         private BasicEffect spriteBatchEffect;
 
         private Texture2D background;
 
+        // AI stuffs
+        private const int POPULATION_SIZE = 10;
+        private LevelComponent[] levels;
+        private PeggleAlgorithm peggleAI;
+
+
         // Camera
 		private Vector3 cameraPosition = new Vector3(0, 0, 0);
 		float cameraViewWidth = 12.5f;
 		private Vector2 cameraView;
-
-        private PeggleAlgorithm peggleAI;
 
         public Game1()
         {
@@ -37,10 +39,14 @@ namespace PeggleAI
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-            
-            level = new LevelComponent();
 
-            peggleAI = new PeggleAlgorithm();
+            peggleAI = new PeggleAlgorithm(this, POPULATION_SIZE);
+
+            levels = new LevelComponent[POPULATION_SIZE];
+            for (int i=0; i<POPULATION_SIZE; i++)
+            {
+                levels[i] = new LevelComponent();
+            }
 
             // Get the width and height of the screen
 			var vp = GraphicsDevice.Viewport;
@@ -77,7 +83,12 @@ namespace PeggleAI
                 Exit();
 
             // TODO: Add your update logic here
-            level.Update(gameTime);
+            foreach (LevelComponent level in levels)
+            {
+                // Just as a note, each level is still tracking input, 
+                // so although the algorithm will manually set angles, pressing buttons will still mess with it.
+                level.Update(gameTime);
+            }
 
             base.Update(gameTime);
         }
@@ -107,7 +118,10 @@ namespace PeggleAI
 				0f
 			);
 
-            level.Draw(spriteBatch);
+            foreach (LevelComponent level in levels)
+            {
+                level.Draw(spriteBatch);
+            }
 
             spriteBatch.End();
 

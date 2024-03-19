@@ -14,18 +14,9 @@ namespace PeggleAI
 { 
 	public class LevelComponent
 	{
-		// Sprites
-		private SpriteBatch spriteBatch;
-		private BasicEffect spriteBatchEffect;
-
 		// Input
 		private KeyboardState oldKbState;
 		private MouseState oldMouseState;
-
-		// Camera
-		private Vector3 cameraPosition = new Vector3(0, 0, 0);
-		float cameraViewWidth = 12.5f;
-		private Vector2 cameraView;
 
 		// Physics
 		public World world { get; private set; }
@@ -81,6 +72,18 @@ namespace PeggleAI
 				pegs.Add( new Peg(float.Parse(pos[0]), float.Parse(pos[1]), this, isOrange) );
 			}
 			
+		}
+
+		// This function takes in an angle in degrees as input, and shoots the ball at that angle
+		// It scores the result of the shot, based on the number of blue & orange pegs cleared.
+		// The function then returns that score.
+		public void shootAtAngle(int angle)
+		{
+			if(!ballShot)
+			{
+				shooter.shoot(angle);
+				ballShot = true;
+			}
 		}
 
 		public void Update(GameTime gameTime)

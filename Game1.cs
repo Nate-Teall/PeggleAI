@@ -9,7 +9,9 @@ namespace PeggleAI
     public class Game1 : Game
     {
         private GraphicsDeviceManager graphics;
+
         private LevelComponent level;
+
         private SpriteBatch spriteBatch;
         private BasicEffect spriteBatchEffect;
 

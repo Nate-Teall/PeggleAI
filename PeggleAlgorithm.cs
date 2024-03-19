@@ -8,7 +8,7 @@ namespace PeggleAI
     // In the future, there may be additional components to one "solution", such as a time to wait.
     // The bucket may be implemented, which means that the algorithm will need to learn to time
     // the shots to land the ball in the bucket.
-    public class PeggleAlgorithm : IGeneticAlgorithm<float>
+    public class PeggleAlgorithm : IGeneticAlgorithm<int>
     {
         Random random;
 
@@ -18,17 +18,22 @@ namespace PeggleAI
         }
 
         // The random initial genomes will be any angle that the ball shooter can aim
-        public float generateGenome()
+        public int generateGenome()
         {
             // Generate a random angle within the bounds of the shooter
-            int randAngle = random.Next(BallShooter.getMaxLeft(), BallShooter.getMaxRight() + 1);
-            // Convert angle to radians
-            return (float)(Math.PI * randAngle / 180.0);
+            return random.Next(BallShooter.getMaxLeft(), BallShooter.getMaxRight() + 1);
         }
 
-        public List<float> generatePopulation(int size)
+        public List<int> generatePopulation(int size)
         {
-            return new List<float>();        
+            ArrayList<int> population = new List<int>();
+
+            for (int i=0; i<size; i++)
+            {
+                population.Add(generateGenome());
+            }
+
+            return population;
         }
 
         public int fitness(float genome)
@@ -36,12 +41,12 @@ namespace PeggleAI
             return 0;
         }
 
-        public float[] selectionPair(List<float> population)
+        public int[] selectionPair(List<int> population)
         {
             return new float[1];
         }
 
-        public float mutation(float genome)
+        public int mutation(int genome)
         {
             return 0;
         }

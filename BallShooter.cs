@@ -87,6 +87,8 @@ namespace PeggleAI
         public void draw(SpriteBatch spriteBatch)
         {
             // Only draw the arrow while the player is aiming
+            // Disabling the arrow because it covers a lot of the screen. It is only needed if a human is playing
+            /*
             if (!level.ballShot)
             {
                 spriteBatch.Draw(
@@ -101,6 +103,7 @@ namespace PeggleAI
                        0f
                 );
             }
+            */
 
             if (ball is not null)
                 ball.draw(spriteBatch);

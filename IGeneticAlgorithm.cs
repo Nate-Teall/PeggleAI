@@ -18,7 +18,7 @@ namespace PeggleAI
 
         // The fitness function takes in a singular genome as input.
         // Depending on the problem that is being solved, the fitness function will measure the performance of the given solution
-        int fitness(T genome);
+        int fitness(Object genome);
 
         // This function chooses the two genomes that performed the best from a given population.
         // These two genomes are the "parents" of the next generation.

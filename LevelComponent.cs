@@ -2,7 +2,7 @@
 
 using System.Collections.Generic;
 using System.IO;
-
+using System.Threading;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -32,10 +32,21 @@ namespace PeggleAI
 		// This variable tracks if the player has shot the ball.
 		// If so, the player should not be able to shoot until the turn is finished
 		public bool ballShot { get; set; } 
-		public Queue<Peg> pegsHit = new Queue<Peg>();
+		public Queue<Peg> pegsHit { get; private set; } = new Queue<Peg>();
+
+		// Threading
+		public EventWaitHandle finishHandle;
+
+		// Store an integer for the score of the previous shot.
+		// The thread that started this shot will check this score when it is updated
+		// Shots are scored by the number of pegs hit. Triple score is rewarded for orange pegs
+		public int previousShotScore { get; private set; }
+		private static int OrangePegScore = 3;
+		private static int BluePegScore = 1;
 
 		public LevelComponent()
 		{
+
 			// Create a new world that holds all physics information
 			world = new World();
 			ballShot = false;
@@ -46,14 +57,6 @@ namespace PeggleAI
 			offScreenBox = new OffScreenBox(0, -6, world, this);
 			lWall = new Wall(-5.25f, 0, world);
 			rWall = new Wall(5.25f, 0, world);
-		}
-
-		public void Initialize()
-		{
-			// Create a new world that holds all physics information
-			world = new World();
-			ballShot = false;
-
 		}
 
 		private void loadLevel()
@@ -75,15 +78,43 @@ namespace PeggleAI
 		}
 
 		// This function takes in an angle in degrees as input, and shoots the ball at that angle
-		// It scores the result of the shot, based on the number of blue & orange pegs cleared.
-		// The function then returns that score.
 		public void shootAtAngle(int angle)
+		{ 
+			shooter.shoot(angle);
+			ballShot = true;
+		}
+
+		private void shotFinished()
 		{
-			if(!ballShot)
+			// Currently, this function runs every frame *before* a ball is shot, and that causes a lot of issues
+			// So, this ensures the function will notify the previous thread only when a shot has been made and finished
+			if(pegsHit.Count < 1)
+				return;
+
+			shooter.removeBall();
+
+			int score = 0;
+
+			Peg peg;
+			while (pegsHit.Count > 0)
 			{
-				shooter.shoot(angle);
-				ballShot = true;
+				peg = pegsHit.Dequeue();
+
+				score = peg.isOrange ? score + OrangePegScore : score + BluePegScore;
+
+				// This is necessary to avoid attepting to remove the same peg from the world twice
+				if (pegs.Contains(peg))
+				{
+					world.Remove(peg.pegBody);
+					pegs.Remove(peg);
+				}
 			}
+
+			ballShot = false;
+			previousShotScore = score;
+			
+			// Notify the algorithm thread that the shot has finished.
+			finishHandle.Set();
 		}
 
 		public void Update(GameTime gameTime)
@@ -96,21 +127,7 @@ namespace PeggleAI
 			// This will be checked every frame that the ball isn't active, may not be the best
 			if(ballShot == false)
 			{
-				shooter.removeBall();
-
-				Peg peg;
-				while (pegsHit.Count > 0)
-				{
-					peg = pegsHit.Dequeue();
-
-					// This is necessary to avoid attepting to remove the same peg from the world twice
-					if (pegs.Contains(peg))
-					{
-						world.Remove(peg.pegBody);
-						pegs.Remove(peg);
-					}
-					
-				}
+				shotFinished();
 			}
 			
 			// Otherwise, update physics world
@@ -153,6 +170,7 @@ namespace PeggleAI
 				peg.draw(spriteBatch);
 
 			// Draw the ball shooter
+
 			shooter.draw(spriteBatch);
 		}
 

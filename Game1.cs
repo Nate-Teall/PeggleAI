@@ -4,6 +4,8 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
+using System.Threading;
+
 namespace PeggleAI
 {
     public class Game1 : Game
@@ -16,7 +18,7 @@ namespace PeggleAI
         private Texture2D background;
 
         // AI stuffs
-        private const int POPULATION_SIZE = 10;
+        private const int POPULATION_SIZE = 1;
         private LevelComponent[] levels;
         private PeggleAlgorithm peggleAI;
 
@@ -40,13 +42,16 @@ namespace PeggleAI
         {
             // TODO: Add your initialization logic here
 
-            peggleAI = new PeggleAlgorithm(this, POPULATION_SIZE);
-
             levels = new LevelComponent[POPULATION_SIZE];
             for (int i=0; i<POPULATION_SIZE; i++)
             {
                 levels[i] = new LevelComponent();
             }
+
+            peggleAI = new PeggleAlgorithm(this, POPULATION_SIZE, levels);
+            
+            Thread t = new Thread(peggleAI.main);
+            t.Start();
 
             // Get the width and height of the screen
 			var vp = GraphicsDevice.Viewport;
@@ -83,6 +88,7 @@ namespace PeggleAI
                 Exit();
 
             // TODO: Add your update logic here
+
             foreach (LevelComponent level in levels)
             {
                 // Just as a note, each level is still tracking input, 

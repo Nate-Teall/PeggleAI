@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 
+using System.Threading;
+
 namespace PeggleAI
 {
     // This class holds the functions required to execute the genetic algorithm for a game of Peggle.
@@ -9,7 +11,7 @@ namespace PeggleAI
     // In the future, there may be additional components to one "solution", such as a time to wait.
     // The bucket may be implemented, which means that the algorithm will need to learn to time
     // the shots to land the ball in the bucket.
-    public class PeggleAlgorithm : IGeneticAlgorithm<int>
+    public class PeggleAlgorithm //: IGeneticAlgorithm<int>
     {
         Random random;
 
@@ -17,11 +19,22 @@ namespace PeggleAI
         // game handles the visuals of our algorithm running
         private Game game;
 
-        public PeggleAlgorithm(Game game, int popSize)
+        private LevelComponent[] levels;
+        private EventWaitHandle[] waitForShot;
+        private int[] population;
+
+        public PeggleAlgorithm(Game game, int popSize, LevelComponent[] levels)
         {
             random = new Random();
             this.game = game;
             populationSize = popSize;
+            this.levels = levels;
+
+            waitForShot = new EventWaitHandle[popSize];
+            for (int i = 0; i < popSize; i++)
+            {
+                waitForShot[i] = new EventWaitHandle(false, EventResetMode.ManualReset);
+            }
         }
 
         // The random initial genomes will be any angle that the ball shooter can aim
@@ -43,10 +56,21 @@ namespace PeggleAI
             return population;
         }
 
-        public int fitness(int genome)
+        public int fitness(int genome, LevelComponent level, EventWaitHandle handle)
         {
-            // This function will launch the ball at a given angle, and return the result of the shot.
-            return 0;
+            // This function will launch the ball at a given angle.
+            // When the simulation finishes, the levelComponent will tell the algorithm what the score was.
+
+            System.Diagnostics.Debug.WriteLine("Shot stared!");
+            level.finishHandle = handle;
+            level.shootAtAngle(genome);
+
+            // Wait until the game finished simulating
+            handle.WaitOne();
+            System.Diagnostics.Debug.WriteLine("Shot finished!");
+
+            return level.previousShotScore;
+
         }
 
         public int[] selectionPair(List<int> population)
@@ -57,6 +81,41 @@ namespace PeggleAI
         public int mutation(int genome)
         {
             return 0;
+        }
+
+        public void main()
+        {
+            population = generatePopulation(populationSize);
+            int[] scores = new int[populationSize];
+            int genome;
+            LevelComponent level;
+            EventWaitHandle handle;
+
+            Thread[] threads = new Thread[populationSize];
+            for (int i=0; i<populationSize; i++)
+            {
+                genome = population[i];
+                level = levels[i];
+                handle = waitForShot[i];
+
+                Thread t = new Thread(
+                    (i) =>
+                    {
+                        System.Diagnostics.Debug.WriteLine(i);
+                        scores[0] = fitness(genome, level, handle);
+                    }
+                );
+                threads[i] = t;
+                t.Start(i);
+                
+            }
+
+            foreach (Thread t in threads)
+            {
+                t.Join();
+            }
+
+            System.Diagnostics.Debug.WriteLine("All shots finished");
         }
 
     }

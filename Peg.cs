@@ -24,7 +24,7 @@ namespace PeggleAI
         private static Vector2 pegTextureSize;
         private static Vector2 pegTextureOrigin;
         private static Vector2 pegTextureScale;
-        private bool isOrange;
+        public bool isOrange { get; private set; }
 
         // Physics
         private static float pegRadius = 0.15f;

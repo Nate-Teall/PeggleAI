@@ -86,7 +86,7 @@ namespace PeggleAI
 		}
 
 		// This function takes in an angle in degrees as input, and shoots the ball at that angle
-		public void shootAtAngle(int angle)
+		public void shootAtAngle(double angle)
 		{ 
 			shooter.shoot(angle);
 			ballShot = true;

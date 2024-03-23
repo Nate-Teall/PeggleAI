@@ -16,30 +16,35 @@ namespace PeggleAI
         Random random;
 
         private int populationSize;
+        private int generationCount;
         // game handles the visuals of our algorithm running
         private Game game;
 
         private LevelComponent[] levels;
         private int[] population;
+        // Determines the range of values that a mutated shot could be
+        // For example, a mutation factor of 10 means that the shot could be changed by +/- 5 degrees 
+        private const int mutationFactor = 10;
 
-        public PeggleAlgorithm(Game game, int popSize, LevelComponent[] levels)
+        public PeggleAlgorithm(Game game, int popSize, int genCount, LevelComponent[] levels)
         {
             random = new Random();
             this.game = game;
             populationSize = popSize;
+            generationCount = genCount;
             this.levels = levels;
         }
 
         // The random initial genomes will be any angle that the ball shooter can aim
-        public int generateGenome()
+        public double generateGenome()
         {
             // Generate a random angle within the bounds of the shooter
             return random.Next(BallShooter.getMaxLeft(), BallShooter.getMaxRight() + 1);
         }
 
-        public int[] generatePopulation(int size)
+        public double[] generatePopulation(int size)
         {
-            int[] population = new int[size];
+            double[] population = new double[size];
 
             for (int i=0; i<size; i++)
             {
@@ -49,7 +54,30 @@ namespace PeggleAI
             return population;
         }
 
-        public int fitness(int genome, LevelComponent level)
+        // This function generates all but the first population. It creates a new set of genomes by mutating the parents
+        private double[] generateFromParents(int size, double[] parents)
+        {
+            double[] population = new double[size];
+            population[0] = parents[0];
+            population[1] = parents[1];
+
+            int parentPoolSize = (populationSize - 2) / 2; // Please use even numbers for population sizes so each remaining size can be equal... 
+            for (int i = 2; i < 2 + parentPoolSize; i++)
+            {
+                // Fill population with children of parent 1
+                population[i] = mutation(parents[0]);
+            }
+
+            for (int i = 2 + parentPoolSize; i < populationSize; i++)
+            {
+                // Fill population with children of parent 2
+                population[i] = mutation(parents[1]);
+            }
+
+            return population;
+        }
+
+        public int fitness(double genome, LevelComponent level)
         {
             // This function will launch the ball at a given angle.
             // When the simulation finishes, the levelComponent will tell the algorithm what the score was.
@@ -68,7 +96,7 @@ namespace PeggleAI
         }
 
         // Performs the fitness function on an entire population
-        private int[] gradePopulation(int[] population)
+        private int[] gradePopulation(double[] population)
         {
             int[] scores = new int[populationSize];
 
@@ -96,14 +124,14 @@ namespace PeggleAI
             return scores;
         }
 
-        public int[] selectionPair(int[] population, int[] scores)
+        public double[] selectionPair(double[] population, int[] scores)
         {
             int high_score = 0;
             int second_high_score = 0;
 
             int highest_i = 0;
             int second_highest_i = 0;
-            int[] pair = new int[2];
+            double[] pair = new double[2];
 
             for (int i=0; i<populationSize; i++)
             {
@@ -125,25 +153,42 @@ namespace PeggleAI
             pair[0] = population[highest_i];
             pair[1] = population[second_highest_i];
 
+            System.Diagnostics.Debug.WriteLine(scores[highest_i] + " " + scores[second_highest_i]);
+
             return pair;
         }
 
-        public int mutation(int genome)
+        public double mutation(double genome)
         {
-            return 0;
+            // As a first experiment, mutations will modify the shot angle by anywhere between +/- 5 degrees
+            return genome + ( (random.NextDouble() * mutationFactor) - (mutationFactor / 2) );
         }
 
         public void main()
         {
-            int[] population = generatePopulation(populationSize);
+            double[] population = generatePopulation(populationSize);
+            int[] scores;
+            for (int i=0; i<generationCount; i++)
+            {
+                scores = gradePopulation(population);
 
-            int[] scores = gradePopulation(population);
+                double[] parents = selectionPair(population, scores);
+                System.Diagnostics.Debug.WriteLine(parents[0] + " " + parents[1]);
 
-            System.Diagnostics.Debug.WriteLine(scores[0] + " " + scores[1] + " " + scores[2]);
-            System.Diagnostics.Debug.WriteLine(population[0] + " " + population[1] + " " + population[2]);
+                printPopulation(population);
 
-            int[] parents = selectionPair(population, scores);
-            System.Diagnostics.Debug.WriteLine(parents[0] + " " + parents[1]);
+                // After grading this population and selecting the parents, create a new population from them.
+                population = generateFromParents(populationSize, parents);
+            }
+        }
+
+        private void printPopulation(double[] population)
+        {
+            foreach (int genome in population)
+            {
+                System.Diagnostics.Debug.Write(genome + " ");
+            }
+            System.Diagnostics.Debug.WriteLine("");
         }
 
     }

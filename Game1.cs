@@ -18,7 +18,8 @@ namespace PeggleAI
         private Texture2D background;
 
         // AI stuffs
-        private const int POPULATION_SIZE = 3;
+        private const int POPULATION_SIZE = 4;
+        private const int GENERATION_COUNT = 5;
         private LevelComponent[] levels;
         private PeggleAlgorithm peggleAI;
 
@@ -48,7 +49,7 @@ namespace PeggleAI
                 levels[i] = new LevelComponent();
             }
 
-            peggleAI = new PeggleAlgorithm(this, POPULATION_SIZE, levels);
+            peggleAI = new PeggleAlgorithm(this, POPULATION_SIZE, GENERATION_COUNT, levels);
             
             Thread t = new Thread(peggleAI.main);
             t.Start();

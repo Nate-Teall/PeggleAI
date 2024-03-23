@@ -67,24 +67,14 @@ namespace PeggleAI
 
         }
 
-        public int[] selectionPair(List<int> population)
+        // Performs the fitness function on an entire population
+        private int[] gradePopulation(int[] population)
         {
-            return new int[1];
-        }
-
-        public int mutation(int genome)
-        {
-            return 0;
-        }
-
-        public void main()
-        {
-            population = generatePopulation(populationSize);
             int[] scores = new int[populationSize];
 
             Thread[] threads = new Thread[populationSize];
-            for (int i=0; i<populationSize; i++)
-            { 
+            for (int i = 0; i < populationSize; i++)
+            {
                 Thread t = new Thread(
                     (i) =>
                     {
@@ -103,10 +93,50 @@ namespace PeggleAI
             }
 
             System.Diagnostics.Debug.WriteLine("All shots finished");
-            foreach (int score in scores) 
+            return scores;
+        }
+
+        public int[] selectionPair(int[] population, int[] scores)
+        {
+            int highest_i = 0;
+            int second_highest_i = 0;
+            int[] pair = new int[2];
+
+            for (int i=0; i<populationSize; i++)
             {
-                System.Diagnostics.Debug.WriteLine(score);
+                if (scores[i] > scores[highest_i])
+                {
+                    second_highest_i = highest_i;
+                    highest_i = i;
+                } 
+                else if (scores[i] > scores[second_highest_i])
+                {
+                    second_highest_i = i;
+                }
             }
+
+            pair[0] = population[highest_i];
+            pair[1] = population[second_highest_i];
+
+            return pair;
+        }
+
+        public int mutation(int genome)
+        {
+            return 0;
+        }
+
+        public void main()
+        {
+            int[] population = generatePopulation(populationSize);
+
+            int[] scores = gradePopulation(population);
+
+            System.Diagnostics.Debug.WriteLine(scores[0] + " " + scores[1] + " " + scores[2]);
+            System.Diagnostics.Debug.WriteLine(population[0] + " " + population[1] + " " + population[2]);
+
+            int[] parents = selectionPair(population, scores);
+            System.Diagnostics.Debug.WriteLine(parents[0] + " " + parents[1]);
         }
 
     }

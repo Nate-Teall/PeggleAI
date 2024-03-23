@@ -100,11 +100,10 @@ namespace PeggleAI
 			{
 				peg = pegsHit.Dequeue();
 
-				score = peg.isOrange ? score + OrangePegScore : score + BluePegScore;
-
 				// This is necessary to avoid attepting to remove the same peg from the world twice
 				if (pegs.Contains(peg))
 				{
+					score = peg.isOrange ? score + OrangePegScore : score + BluePegScore;
 					world.Remove(peg.pegBody);
 					pegs.Remove(peg);
 				}

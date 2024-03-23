@@ -189,7 +189,7 @@ namespace PeggleAI
                 printPopulation(population);
 
                 // Sleep for 1 second in between generations, just for visuals
-                Thread.Sleep(5000);
+                Thread.Sleep(1000);
             }
         }
 

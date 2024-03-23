@@ -33,12 +33,6 @@ namespace PeggleAI
 
 		private bool firstShot = false;
 
-		// Keeps track of how long a ball has stayed in place for. 
-		// If a ball gets stuck for 1 second, it will clear the pegs but continue the shot
-		private float stuckTimer = 0f;
-		private const float maxStuckTime = 1f;
-		private Vector2 prevBallPos;
-
 		// This variable tracks if the player has shot the ball.
 		// If so, the player should not be able to shoot until the turn is finished
 		public bool ballShot { get; set; } 
@@ -65,8 +59,8 @@ namespace PeggleAI
 			loadLevel();
 			shooter = new BallShooter(this);
 			offScreenBox = new OffScreenBox(0, -6, world, this);
-			lWall = new Wall(-5.25f, 0, world);
-			rWall = new Wall(5.25f, 0, world);
+			lWall = new Wall(-5.5f, 0, world);
+			rWall = new Wall(5.5f, 0, world);
 		}
 
 		private void loadLevel()
@@ -149,22 +143,6 @@ namespace PeggleAI
 			//HandleMouse();
 
 			float sec = (float)gameTime.ElapsedGameTime.TotalSeconds;
-
-			// Check if the ball is stuck, and clear the pegs if stuck for too long
-			if (ballShot) 
-			{ 
-				Vector2 ballPos = shooter.ball.ballBody.Position;
-			
-				if (ballPos.Equals(prevBallPos))
-					stuckTimer += sec;
-				else
-					stuckTimer = 0f;
-
-				if (stuckTimer > maxStuckTime) 
-					previousShotScore += clearPegs();
-
-				prevBallPos = ballPos;
-			}
 
 			// If the turn has ended, remove the ball and all the pegs that have been hit
 			// This will be checked every frame that the ball isn't active, may not be the best

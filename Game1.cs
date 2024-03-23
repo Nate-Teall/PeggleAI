@@ -18,8 +18,8 @@ namespace PeggleAI
         private Texture2D background;
 
         // AI stuffs
-        private const int POPULATION_SIZE = 4;
-        private const int GENERATION_COUNT = 2;
+        private const int POPULATION_SIZE = 10;
+        private const int GENERATION_COUNT = 5;
         private LevelComponent[] levels;
         private PeggleAlgorithm peggleAI;
 

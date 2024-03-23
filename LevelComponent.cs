@@ -1,6 +1,7 @@
 ﻿using System;
 
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Threading;
 using Microsoft.Xna.Framework;
@@ -22,12 +23,19 @@ namespace PeggleAI
 		public World world { get; private set; }
 
 		// Level Objects
-		//private Texture2D background;
 		private HashSet<Peg> pegs;
 		private BallShooter shooter;
 		private OffScreenBox offScreenBox;
 		private Wall lWall;
 		private Wall rWall;
+
+		private bool firstShot = false;
+
+		// Keeps track of how long a ball has stayed in place for. 
+		// If a ball gets stuck for 1 second, it will clear the pegs but continue the shot
+		private float stuckTimer = 0f;
+		private const float maxStuckTime = 1f;
+		private Vector2 prevBallPos;
 
 		// This variable tracks if the player has shot the ball.
 		// If so, the player should not be able to shoot until the turn is finished
@@ -82,17 +90,27 @@ namespace PeggleAI
 		{ 
 			shooter.shoot(angle);
 			ballShot = true;
+			firstShot = true;
 		}
 
 		private void shotFinished()
 		{
 			// Currently, this function runs every frame *before* a ball is shot, and that causes a lot of issues
 			// So, this ensures the function will notify the previous thread only when a shot has been made and finished
-			if(pegsHit.Count < 1)
+			if(!firstShot)
 				return;
 
 			shooter.removeBall();
 
+			//ballShot = false;
+			previousShotScore += clearPegs();
+			
+			// Notify the algorithm thread that the shot has finished.
+			finishHandle.Set();
+		}
+
+		private int clearPegs()
+		{
 			int score = 0;
 
 			Peg peg;
@@ -108,12 +126,8 @@ namespace PeggleAI
 					pegs.Remove(peg);
 				}
 			}
-
-			ballShot = false;
-			previousShotScore = score;
 			
-			// Notify the algorithm thread that the shot has finished.
-			finishHandle.Set();
+			return score;
 		}
 
 		public void Update(GameTime gameTime)
@@ -122,15 +136,33 @@ namespace PeggleAI
 			HandleKeyboard(gameTime);
 			//HandleMouse();
 
+			float sec = (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+			// Check if the ball is stuck, and clear the pegs if stuck for too long
+			if (ballShot) 
+			{ 
+				Vector2 ballPos = shooter.ball.ballBody.Position;
+			
+				if (ballPos.Equals(prevBallPos))
+					stuckTimer += sec;
+				else
+					stuckTimer = 0f;
+
+				if (stuckTimer > maxStuckTime) 
+					clearPegs();
+
+				prevBallPos = ballPos;
+			}
+
 			// If the turn has ended, remove the ball and all the pegs that have been hit
 			// This will be checked every frame that the ball isn't active, may not be the best
 			if(ballShot == false)
 			{
 				shotFinished();
 			}
-			
+
 			// Otherwise, update physics world
-			world.Step((float)gameTime.ElapsedGameTime.TotalSeconds);
+			world.Step(sec);
 		}
 
 		private void HandleMouse()
@@ -157,6 +189,7 @@ namespace PeggleAI
 			{
 				shooter.shoot();
 				ballShot = true;
+				firstShot = true;
 			}
 
 			oldKbState = state;

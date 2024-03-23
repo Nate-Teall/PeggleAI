@@ -23,7 +23,7 @@ namespace PeggleAI
 
         private float rotation;
 
-        private Ball ball;
+        public Ball ball { get; private set; }
 
         private const float ROTATION_SPEED = 1f;
         // Max angle the arrow can point left/right
@@ -39,7 +39,7 @@ namespace PeggleAI
             this.rotation = (float)Math.PI;
         }
 
-        public Ball getBall() { return this.ball; }
+        //public Ball getBall() { return this.ball; }
 
         public static int getMaxLeft() { return MAX_LEFT_DEG; }
 

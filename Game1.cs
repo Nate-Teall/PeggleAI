@@ -18,7 +18,7 @@ namespace PeggleAI
         private Texture2D background;
 
         // AI stuffs
-        private const int POPULATION_SIZE = 1;
+        private const int POPULATION_SIZE = 3;
         private LevelComponent[] levels;
         private PeggleAlgorithm peggleAI;
 
@@ -94,7 +94,9 @@ namespace PeggleAI
                 // Just as a note, each level is still tracking input, 
                 // so although the algorithm will manually set angles, pressing buttons will still mess with it.
                 level.Update(gameTime);
+                //System.Diagnostics.Debug.Write(level.ballShot);
             }
+            //System.Diagnostics.Debug.WriteLine("");
 
             base.Update(gameTime);
         }

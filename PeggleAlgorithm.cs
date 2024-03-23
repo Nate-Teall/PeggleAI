@@ -20,7 +20,6 @@ namespace PeggleAI
         private Game game;
 
         private LevelComponent[] levels;
-        private EventWaitHandle[] waitForShot;
         private int[] population;
 
         public PeggleAlgorithm(Game game, int popSize, LevelComponent[] levels)
@@ -29,12 +28,6 @@ namespace PeggleAI
             this.game = game;
             populationSize = popSize;
             this.levels = levels;
-
-            waitForShot = new EventWaitHandle[popSize];
-            for (int i = 0; i < popSize; i++)
-            {
-                waitForShot[i] = new EventWaitHandle(false, EventResetMode.ManualReset);
-            }
         }
 
         // The random initial genomes will be any angle that the ball shooter can aim
@@ -56,12 +49,13 @@ namespace PeggleAI
             return population;
         }
 
-        public int fitness(int genome, LevelComponent level, EventWaitHandle handle)
+        public int fitness(int genome, LevelComponent level)
         {
             // This function will launch the ball at a given angle.
             // When the simulation finishes, the levelComponent will tell the algorithm what the score was.
 
             System.Diagnostics.Debug.WriteLine("Shot stared!");
+            EventWaitHandle handle = new EventWaitHandle(false, EventResetMode.ManualReset);
             level.finishHandle = handle;
             level.shootAtAngle(genome);
 
@@ -87,27 +81,20 @@ namespace PeggleAI
         {
             population = generatePopulation(populationSize);
             int[] scores = new int[populationSize];
-            int genome;
-            LevelComponent level;
-            EventWaitHandle handle;
 
             Thread[] threads = new Thread[populationSize];
             for (int i=0; i<populationSize; i++)
-            {
-                genome = population[i];
-                level = levels[i];
-                handle = waitForShot[i];
-
+            { 
                 Thread t = new Thread(
                     (i) =>
                     {
                         System.Diagnostics.Debug.WriteLine(i);
-                        scores[0] = fitness(genome, level, handle);
+                        scores[(int)i] = fitness(population[(int)i], levels[(int)i]);
                     }
                 );
+
                 threads[i] = t;
                 t.Start(i);
-                
             }
 
             foreach (Thread t in threads)
@@ -116,6 +103,10 @@ namespace PeggleAI
             }
 
             System.Diagnostics.Debug.WriteLine("All shots finished");
+            foreach (int score in scores) 
+            {
+                System.Diagnostics.Debug.WriteLine(score);
+            }
         }
 
     }

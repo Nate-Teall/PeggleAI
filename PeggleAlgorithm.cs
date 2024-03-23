@@ -98,19 +98,26 @@ namespace PeggleAI
 
         public int[] selectionPair(int[] population, int[] scores)
         {
+            int high_score = 0;
+            int second_high_score = 0;
+
             int highest_i = 0;
             int second_highest_i = 0;
             int[] pair = new int[2];
 
             for (int i=0; i<populationSize; i++)
             {
-                if (scores[i] > scores[highest_i])
+                if (scores[i] > high_score)
                 {
+                    second_high_score = high_score;
+                    high_score = scores[i];
+
                     second_highest_i = highest_i;
                     highest_i = i;
                 } 
-                else if (scores[i] > scores[second_highest_i])
+                else if (scores[i] > second_high_score)
                 {
+                    second_high_score = scores[i];
                     second_highest_i = i;
                 }
             }

@@ -149,7 +149,7 @@ namespace PeggleAI
 					stuckTimer = 0f;
 
 				if (stuckTimer > maxStuckTime) 
-					clearPegs();
+					previousShotScore += clearPegs();
 
 				prevBallPos = ballPos;
 			}

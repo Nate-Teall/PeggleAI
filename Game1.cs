@@ -19,7 +19,7 @@ namespace PeggleAI
 
         // AI stuffs
         private const int POPULATION_SIZE = 4;
-        private const int GENERATION_COUNT = 5;
+        private const int GENERATION_COUNT = 2;
         private LevelComponent[] levels;
         private PeggleAlgorithm peggleAI;
 

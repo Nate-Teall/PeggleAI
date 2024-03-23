@@ -179,6 +179,17 @@ namespace PeggleAI
 
                 // After grading this population and selecting the parents, create a new population from them.
                 population = generateFromParents(populationSize, parents);
+
+                // Reset the level in between trials
+                foreach(LevelComponent level in levels)
+                {
+                    level.reset();
+                }
+
+                printPopulation(population);
+
+                // Sleep for 1 second in between generations, just for visuals
+                Thread.Sleep(5000);
             }
         }
 

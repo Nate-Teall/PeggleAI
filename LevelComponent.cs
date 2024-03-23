@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -24,6 +25,7 @@ namespace PeggleAI
 
 		// Level Objects
 		private HashSet<Peg> pegs;
+		private string[] pegPositions; // Save the initial configuration for quick resetting
 		private BallShooter shooter;
 		private OffScreenBox offScreenBox;
 		private Wall lWall;
@@ -70,11 +72,22 @@ namespace PeggleAI
 		private void loadLevel()
 		{
 			// Load data from level1 file
-			string[] pegPositions = File.ReadAllLines("../../../Level1.txt");
+			pegPositions = File.ReadAllLines("../../../Level1.txt");
+
+			reset();
+			
+		}
+
+		// Reset the level to the initial configuration
+		public void reset()
+		{
+			previousShotScore = 0;
 
 			// Create all of the pegs in the level
 			pegs = new HashSet<Peg>();
+			Peg newPeg;
 			bool isOrange;
+
 			foreach (string position in pegPositions)
 			{
 				string[] pos = position.Split(' ');
@@ -82,7 +95,6 @@ namespace PeggleAI
 				isOrange = pos[2] == "O"? true : false;
 				pegs.Add( new Peg(float.Parse(pos[0]), float.Parse(pos[1]), this, isOrange) );
 			}
-			
 		}
 
 		// This function takes in an angle in degrees as input, and shoots the ball at that angle

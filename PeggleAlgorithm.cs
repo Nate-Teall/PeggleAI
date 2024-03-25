@@ -19,6 +19,7 @@ namespace PeggleAI
         private int generationCount;
         // game handles the visuals of our algorithm running
         private Game game;
+        private Mutex levelMutex;
 
         private LevelComponent[] levels;
         private int[] population;
@@ -26,12 +27,13 @@ namespace PeggleAI
         // For example, a mutation factor of 10 means that the shot could be changed by +/- 5 degrees 
         private const int mutationFactor = 10;
 
-        public PeggleAlgorithm(Game game, int popSize, int genCount, LevelComponent[] levels)
+        public PeggleAlgorithm(Game game, int popSize, int genCount, LevelComponent[] levels, Mutex levelMutex)
         {
             random = new Random();
             this.game = game;
             populationSize = popSize;
             generationCount = genCount;
+            this.levelMutex = levelMutex;
             this.levels = levels;
         }
 
@@ -180,11 +182,13 @@ namespace PeggleAI
                 // After grading this population and selecting the parents, create a new population from them.
                 population = generateFromParents(populationSize, parents);
 
-                // Reset the level in between trials
+                // Reset the level in between trials, but wait for the physics to finish stepping first
+                levelMutex.WaitOne();
                 foreach(LevelComponent level in levels)
                 {
                     level.reset();
                 }
+                levelMutex.ReleaseMutex();
 
                 printPopulation(population);
 

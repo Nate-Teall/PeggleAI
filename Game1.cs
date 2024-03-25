@@ -22,6 +22,9 @@ namespace PeggleAI
         private const int GENERATION_COUNT = 5;
         private LevelComponent[] levels;
         private PeggleAlgorithm peggleAI;
+        // Program will crash if the level is reset while the world is stepping.
+        // This mutex pauses Game1 thread before calling LevelComponent.Update(), and LevelComponent.Reset();
+        private Mutex levelMutex;
 
 
         // Camera
@@ -49,7 +52,8 @@ namespace PeggleAI
                 levels[i] = new LevelComponent();
             }
 
-            peggleAI = new PeggleAlgorithm(this, POPULATION_SIZE, GENERATION_COUNT, levels);
+            levelMutex = new Mutex();
+            peggleAI = new PeggleAlgorithm(this, POPULATION_SIZE, GENERATION_COUNT, levels, levelMutex);
             
             Thread t = new Thread(peggleAI.main);
             t.Start();
@@ -90,6 +94,8 @@ namespace PeggleAI
 
             // TODO: Add your update logic here
 
+            // Wait for Level Resetting to complete before stepping
+            levelMutex.WaitOne();
             foreach (LevelComponent level in levels)
             {
                 // Just as a note, each level is still tracking input, 
@@ -97,7 +103,7 @@ namespace PeggleAI
                 level.Update(gameTime);
                 //System.Diagnostics.Debug.Write(level.ballShot);
             }
-            //System.Diagnostics.Debug.WriteLine("");
+            levelMutex.ReleaseMutex();
 
             base.Update(gameTime);
         }
